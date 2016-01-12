@@ -1,0 +1,4 @@
+<?xml version="1.0" encoding="iso-8859-1"?>
+<workspace>
+<batchBuild><batchDefinition><name>all</name><member><project>blinking_imx_demo</project><configuration>Release</configuration></member><member><project>blinking_imx_demo</project><configuration>Debug</configuration></member></batchDefinition><batchDefinition><name>Release</name><member><project>blinking_imx_demo</project><configuration>Release</configuration></member></batchDefinition><batchDefinition><name>Debug</name><member><project>blinking_imx_demo</project><configuration>Debug</configuration></member></batchDefinition></batchBuild>
+<project><path>$WS_DIR$/blinking_imx_demo.ewp</path></project></workspace>
