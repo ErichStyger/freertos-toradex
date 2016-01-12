@@ -1,0 +1,9 @@
+<?xml version="1.0"?>
+<workspace xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="workingsets.xsd">
+  <projects>
+  <project><name>sema4_demo_imx7d_val_m4</name><path>.</path><open>true</open><activeconfig>release</activeconfig><buildreferences config="release">false</buildreferences><activeconfig>debug</activeconfig><buildreferences config="debug">false</buildreferences></project></projects>
+  <workingsets>
+  <workingSet editPageId="org.eclipse.cdt.ui.CElementWorkingSetPage" id="1323268527287_1" label="sema4_demo" name="sema4_demo"><item factoryID="org.eclipse.cdt.ui.PersistableCElementFactory" path="/sema4_demo_imx7d_val_m4" type="4"/></workingSet></workingsets>
+  <cdtconfigurations>
+  <workingSet name="sema4_demo"><config name="release"><project config="com.freescale.arm.cdt.toolchain.config.arm.release.695495605" name="sema4_demo_imx7d_val_m4" configName="release"/></config><config name="debug"><project config="com.freescale.arm.cdt.toolchain.config.arm.release.695495605" name="sema4_demo_imx7d_val_m4" configName="debug"/></config></workingSet></cdtconfigurations>
+</workspace>
