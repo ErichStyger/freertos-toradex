@@ -39,7 +39,7 @@
 extern "C" {
 #endif
 
-void ECSPI_XFER_Config(ecspi_init_t* initConfig);
+void ECSPI_XFER_Config(const ecspi_init_config_t* initConfig);
 bool ECSPI_XFER_TransmitBurst(void);
 bool ECSPI_XFER_ReceiveBurst(void);
 bool ECSPI_XFER_TransferBlocking(uint8_t *txBuffer, uint8_t *rxBuffer, uint32_t transferSize);

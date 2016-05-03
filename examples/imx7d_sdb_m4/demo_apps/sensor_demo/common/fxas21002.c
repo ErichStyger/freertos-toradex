@@ -36,52 +36,55 @@
 
 /*FUNCTION****************************************************************
 *
-* Function Name    : fxas21002_init
+* Function Name    : FXAS_Init
 * Returned Value   : result
 * Comments         : Initialize FXAS21002 Gyro sensor.
 *
 *END*********************************************************************/
-bool fxas21002_init(gyro_sensor_t* pThisGyro)
+bool FXAS_Init(fxas_handle_t *handle, const fxas_init_t *fxas_config)
 {
-    uint8_t txBuffer;
-    uint8_t cmdBuffer[2];
+    // Place FXAS21002 in Standby.
+    FXAS_WriteReg(handle, FXAS21002_CTRL_REG1, 0x00);
 
-    pThisGyro->fDegPerSecPerCount = FXAS21002_DEGPERSECPERCOUNT;
+    // Configure full scale range.
+    FXAS_WriteReg(handle, FXAS21002_CTRL_REG0, (uint8_t)fxas_config->range);
 
-    // Write 0000 0000 = 0x00 to CTRL_REG1 to place FXOS21002 in Standby
-    // [7]: ZR_cond=0
-    // [6]: RST=0
-    // [5]: ST=0 self test disabled
-    // [4-2]: DR[2-0]=000 for 800Hz
-    // [1-0]: Active=0, Ready=0 for Standby mode
-    cmdBuffer[0] = BOARD_I2C_FXAS21002_ADDR << 1;
-    cmdBuffer[1] = FXAS21002_CTRL_REG1;
-    txBuffer = 0x00;
-    if (!I2C_XFER_SendDataBlocking(cmdBuffer, 2, &txBuffer, 1))
+    // Configure output data rate.
+    FXAS_WriteReg(handle, FXAS21002_CTRL_REG1, (uint8_t)fxas_config->dataRate);
+
+    return true;
+}
+
+/*FUNCTION**********************************************************************
+ *
+ * Function Name : FXAS_Deinit
+ * Description   : Disable the FXAS21002 and reset register content.
+ *
+ *END**************************************************************************/
+bool FXAS_Deinit(fxas_handle_t *handle)
+{
+    // Reset Register content and place FXAS21002 into Standby Mode.
+    return FXAS_WriteReg(handle, FXAS21002_CTRL_REG1, 0x40);
+}
+
+/*FUNCTION****************************************************************
+*
+* Function Name    : FXAS_Enable
+* Returned Value   : result
+* Comments         : Enable the FXAS21002 sensor.
+*
+*END*********************************************************************/
+bool FXAS_Enable(fxas_handle_t *handle)
+{
+    uint8_t regVal;
+
+    if (!FXAS_ReadReg(handle, FXAS21002_CTRL_REG1, &regVal))
         return false;
 
-    // write 0000 0000 = 0x00 to CTRL_REG0 to configure range and filters
-    // [7-6]: BW[1-0]=00, LPF disabled
-    // [5]: SPIW=0 4 wire SPI (irrelevant)
-    // [4-3]: SEL[1-0]=00 for 10Hz HPF at 200Hz ODR
-    // [2]: HPF_EN=0 disable HPF
-    // [1-0]: FS[1-0]=00 for 1600dps (TBD CHANGE TO 2000dps when final trimmed parts available)
-    cmdBuffer[0] = BOARD_I2C_FXAS21002_ADDR << 1;
-    cmdBuffer[1] = FXAS21002_CTRL_REG0;
-    txBuffer = 0x00;
-    if (!I2C_XFER_SendDataBlocking(cmdBuffer, 2, &txBuffer, 1))
-        return false;
+    /* Active FXAS21002 */
+    regVal |= 0x02;
 
-    // write 0000 0010 = 0x02 to CTRL_REG1 to configure 800Hz ODR and enter Active mode
-    // [7]: ZR_cond=0
-    // [6]: RST=0
-    // [5]: ST=0 self test disabled
-    // [4-2]: DR[2-0]=000 for 800Hz ODR
-    // [1-0]: Active=1, Ready=0 for Active mode
-    cmdBuffer[0] = BOARD_I2C_FXAS21002_ADDR << 1;
-    cmdBuffer[1] = FXAS21002_CTRL_REG1;
-    txBuffer = 0x02;
-    if (!I2C_XFER_SendDataBlocking(cmdBuffer, 2, &txBuffer, 1))
+    if (!FXAS_WriteReg(handle, FXAS21002_CTRL_REG1, regVal))
         return false;
 
     return true;
@@ -89,26 +92,84 @@ bool fxas21002_init(gyro_sensor_t* pThisGyro)
 
 /*FUNCTION****************************************************************
 *
-* Function Name    : fxas21002_read_data
+* Function Name    : FXAS_Disable
 * Returned Value   : result
-* Comments         : Get current height and temperature from fxas21002.
+* Comments         : Disable the FXAS21002 sensor.
 *
 *END*********************************************************************/
-bool fxas21002_read_data(gyro_sensor_t* pThisGyro)
+bool FXAS_Disable(fxas_handle_t *handle)
+{
+    uint8_t regVal;
+
+    if (!FXAS_ReadReg(handle, FXAS21002_CTRL_REG1, &regVal))
+        return false;
+
+    /* De-active FXAS21002 */
+    regVal &= ~0x02;
+
+    if (!FXAS_WriteReg(handle, FXAS21002_CTRL_REG1, regVal))
+        return false;
+
+    return true;
+}
+
+/*FUNCTION**********************************************************************
+ *
+ * Function Name : FXAS_WriteReg
+ * Description   : Write the specified register of FXAS21002.
+ * The writing process is through I2C.
+ *
+ *END**************************************************************************/
+bool FXAS_WriteReg(fxas_handle_t *handle, uint8_t regAddr, uint8_t regVal)
+{
+    uint8_t cmdBuffer[2];
+
+    cmdBuffer[0] = handle->address << 1;
+    cmdBuffer[1] = regAddr;
+
+    return I2C_XFER_SendDataBlocking(handle->device, cmdBuffer, 2, &regVal, 1); 
+}
+
+/*FUNCTION**********************************************************************
+ *
+ * Function Name : FXAS_ReadReg
+ * Description   : Read the specified register value of FXAS21002.
+ * The reading process is through I2C.
+ *
+ *END**************************************************************************/
+bool FXAS_ReadReg(fxas_handle_t *handle, uint8_t regAddr, uint8_t *regValPtr)
+{
+    uint8_t cmdBuffer[3];
+
+    cmdBuffer[0] = handle->address << 1;
+    cmdBuffer[1] = regAddr;
+    cmdBuffer[2] = (handle->address << 1) + 1;
+
+    return I2C_XFER_ReceiveDataBlocking(handle->device, cmdBuffer, 3, regValPtr, 1);
+}
+
+/*FUNCTION****************************************************************
+*
+* Function Name    : FXAS_ReadData
+* Returned Value   : result
+* Comments         : Get 3-Axes Gyro from fxas21002.
+*
+*END*********************************************************************/
+bool FXAS_ReadData(fxas_handle_t *handle, fxas_data_t *val)
 {
     uint8_t rxBuffer[6];
     uint8_t cmdBuffer[3];
 
-    // store the gain terms in the GyroSensor structure
-    cmdBuffer[0] = BOARD_I2C_FXAS21002_ADDR << 1;
+    // Store the gain terms in the GyroSensor data structure.
+    cmdBuffer[0] = handle->address << 1;
     cmdBuffer[1] = FXAS21002_OUT_X_MSB;
-    cmdBuffer[2] = (BOARD_I2C_FXAS21002_ADDR << 1) + 1;
-    if (!I2C_XFER_ReceiveDataBlocking(cmdBuffer, 3, rxBuffer, 6))
+    cmdBuffer[2] = (handle->address << 1) + 1;
+    if (!I2C_XFER_ReceiveDataBlocking(handle->device, cmdBuffer, 3, rxBuffer, 6))
         return false;
 
-    pThisGyro->iYpFast[0] = (rxBuffer[0] << 8) | rxBuffer[1];
-    pThisGyro->iYpFast[1] = (rxBuffer[2] << 8) | rxBuffer[3];
-    pThisGyro->iYpFast[2] = (rxBuffer[4] << 8) | rxBuffer[5];
+    val->gyroX = (rxBuffer[0] << 8) | rxBuffer[1];
+    val->gyroY = (rxBuffer[2] << 8) | rxBuffer[3];
+    val->gyroZ = (rxBuffer[4] << 8) | rxBuffer[5];
 
     return true;
 }

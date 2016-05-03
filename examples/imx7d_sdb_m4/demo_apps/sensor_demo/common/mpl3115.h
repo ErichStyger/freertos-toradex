@@ -34,13 +34,21 @@
 #include <stdint.h>
 #include <stdbool.h>
 
-/* I2C Slave Address define */
+/*!
+ * @addtogroup mpl3115
+ * @{
+ */
+
+/*******************************************************************************
+ * Definitions
+ ******************************************************************************/
+/*! @brief MPL3115 I2C address. */
 #define MPL3115_ADDRESS            (0x60)
 
-/* MPL3115 device ID number */
+/*! @brief MPL3115 device ID number. */
 #define MPL3115_DEVICE_ID          (0xC4)
 
-/* MPL3115 Registers address definition */
+/*! @briefRegister address Definitions. */
 #define MPL3115_STATUS             (0x00)
 #define MPL3115_OUT_P_MSB          (0x01)
 #define MPL3115_OUT_P_CSB          (0x02)
@@ -88,29 +96,125 @@
 #define MPL3115_OFF_T              (0x2C)
 #define MPL3115_OFF_H              (0x2D)
 
-typedef struct _pressure_sensor
-{
-    int32_t iHp;                    // slow (typically 25Hz) height (counts)
-    int32_t iHpFast;                // fast (typically 200Hz) height (counts)
-    int16_t iTp;                    // slow (typically 25Hz) temperature (count)
-    int16_t iTpFast;                // fast (typically 200Hz) temperature (counts)
-    float fHp;                      // slow (typically 25Hz) height (m)
-    float fTp;                      // slow (typically 25Hz) temperature (C)
-    float fmPerCount;               // initialized to FMPERCOUNT
-    float fCPerCount;               // initialized to FCPERCPOUNT
-} pressure_sensor_t;
+/*
+ * Field Definitions.
+ */
 
+/*! @brief mpl3115 Altimeter/Barometer selection. */
+typedef enum _mpl3115_output_format_cfg
+{
+    mpl3115OutputFormatAltimeter = 0x80,
+    mpl3115OutputFormatBarometer = 0x0
+} mpl3115_output_format_cfg_t;
+
+/*! @brief mpl3115 raw data output without digital data processing selection. */
+typedef enum _mpl3115_output_mode_cfg
+{
+    mpl3115OutputModeRaw         = 0x40,
+    mpl3115OutputModeNormal      = 0x0
+} mpl3115_output_mode_cfg_t;
+
+/*! @brief mpl3115 oversample ratio selection. */
+typedef enum _mpl3115_oversample_cfg
+{
+    mpl3115OverSampleX1          = 0x0 << 3,
+    mpl3115OverSampleX2          = 0x1 << 3,
+    mpl3115OverSampleX4          = 0x2 << 3,
+    mpl3115OverSampleX8          = 0x3 << 3,
+    mpl3115OverSampleX16         = 0x4 << 3,
+    mpl3115OverSampleX32         = 0x5 << 3,
+    mpl3115OverSampleX64         = 0x6 << 3,
+    mpl3115OverSampleX128        = 0x7 << 3
+} mpl3115_oversample_cfg_t;
+
+/*! @brief fxos configure definition. */
+typedef struct _mpl_handle
+{
+    /* I2C relevant definition. */
+    i2c_handle_t *device;  /*!< I2C handle. */
+} mpl_handle_t;
+
+/*! @brief Initialize structure of mpl3115 */
+typedef struct _mpl3115_init
+{
+    mpl3115_output_format_cfg_t outputFormat;
+    mpl3115_output_mode_cfg_t   outputMode;
+    mpl3115_oversample_cfg_t    oversampleRatio;
+} mpl3115_init_t;
+
+/*! @brief mpl3115 Pressure/Altitude and Temperature data structure */
+typedef struct _mpl3115_data
+{
+    int32_t presData;
+    int16_t tempData;
+} mpl3115_data_t;
+
+/*******************************************************************************
+ * API
+ ******************************************************************************/
 /* Function prototypes */
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-bool mpl3115_init(pressure_sensor_t*);
-bool mpl3115_read_data(pressure_sensor_t*);
+/*!
+ * @brief MPL3115 initialize function.
+ *
+ * This function should be called after I2C transfer driver is initialized, and
+ * in this function, some configurations are fixed.
+ * If users want to change the settings, they have to use fxos_write_reg() to set
+ * the register value of MPL3115.
+ * @param handle MPL3115 handle structure.
+ * @param mpl3115_config mpl3115 configuration structure.
+ */
+bool MPL3115_Init(mpl_handle_t *handle, const mpl3115_init_t *mpl3115_config);
+
+/*!
+ * @brief Deinit the MPL3115 sensor.
+ * @param handle MPL3115 handler structure.
+ */
+bool MPL3115_Deinit(mpl_handle_t *handle);
+
+/*!
+ * @brief Enable the MPL3115 sensor.
+ * @param handle MPL3115 handler structure.
+ */
+bool MPL3115_Enable(mpl_handle_t *handle);
+
+/*!
+ * @brief Disable the MPL3115 sensor.
+ * @param handle MPL3115 handler structure.
+ */
+bool MPL3115_Disable(mpl_handle_t *handle);
+
+/*!
+ * @brief Write register to MPL3115 using I2C.
+ * @param handle MPL3115 handle structure.
+ * @param regAddr The register address in mpl3115.
+ * @param regVal Value needs to write into the register.
+ */
+bool MPL3115_WriteReg(mpl_handle_t *handle, uint8_t regAddr, uint8_t regVal);
+
+/*!
+ * @brief Read register from MPL3115 using I2C.
+ * @param handle MPL3115 handle structure.
+ * @param regAddr The register address in mpl3115.
+ * @param regValPtr Value pointer to written into.
+ */
+bool MPL3115_ReadReg(mpl_handle_t *handle, uint8_t regAddr, uint8_t *regValPtr);
+
+/*!
+ * @brief Read sensor data from MPL3115 using I2C
+ * @param handle MPL3115 handler structure.
+ * @param val Sensor data pointer read from mpl3115.
+ */
+bool MPL3115_ReadData(mpl_handle_t *handle, mpl3115_data_t *val);
 
 #ifdef __cplusplus
 }
 #endif
+
+/*! @} */
 
 #endif /* __MPL3115_H__ */
 /*******************************************************************************

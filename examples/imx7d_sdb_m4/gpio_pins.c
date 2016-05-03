@@ -37,8 +37,8 @@ gpio_config_t gpioKeyFunc1 = {
     5,                                              /* muxConfig */
     &IOMUXC_SW_PAD_CTL_PAD_SD2_RESET_B,             /* padReg */
     IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO14_PS(2) |        /* padConfig */
-        IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO14_PE_MASK |
-	IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO14_HYS_MASK,
+    IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO14_PE_MASK |
+    IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO14_HYS_MASK,
     GPIO5,                                          /* base */
     11                                              /* pin */
 };
@@ -49,10 +49,22 @@ gpio_config_t gpioKeyFunc2 = {
     5,                                              /* muxConfig */
     &IOMUXC_SW_PAD_CTL_PAD_SD2_WP,                  /* padReg */
     IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO15_PS(2) |        /* padConfig */
-        IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO15_PE_MASK |
-	IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO15_HYS_MASK,
+    IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO15_PE_MASK |
+    IOMUXC_SW_PAD_CTL_PAD_GPIO1_IO15_HYS_MASK,
     GPIO5,                                          /* base */
     10                                              /* pin */
+};
+
+gpio_config_t gpioSensorInt = {
+    "SensorInt",                                    /* name */
+    &IOMUXC_SW_MUX_CTL_PAD_SAI1_TX_DATA,            /* muxReg */
+    5,                                              /* muxConfig */
+    &IOMUXC_SW_PAD_CTL_PAD_SAI1_TX_DATA,            /* padReg */
+    IOMUXC_SW_PAD_CTL_PAD_SAI1_TX_DATA_PS(2)   |    /* padConfig */
+    IOMUXC_SW_PAD_CTL_PAD_SAI1_TX_DATA_PE_MASK |
+    IOMUXC_SW_PAD_CTL_PAD_SAI1_TX_DATA_HYS_MASK,
+    GPIO6,                                          /* base */
+    15                                              /* pin */
 };
 
 void configure_gpio_pin(gpio_config_t *config)

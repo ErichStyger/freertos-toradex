@@ -32,18 +32,48 @@
 
 #include <stdint.h>
 #include <stdbool.h>
+#include "FreeRTOS.h"
+#include "semphr.h"
 #include "i2c_imx.h"
+
+/* Type definitions */
+typedef struct _i2c_handle {
+    I2C_Type         *base;            /*!< The base address of I2C instance. */
+    IRQn_Type         irqNum;          /*!< The interrupt interrupt request number. */
+    uint32_t          irqPrio;         /*!< The interrupt interrupt request priority. */
+    const uint8_t    *cmdBuff;         /*!< The buffer of I2C command. */
+    const uint8_t    *txBuff;          /*!< The buffer of data being sent.*/
+    uint8_t          *rxBuff;          /*!< The buffer of received data. */
+    uint32_t          cmdSize;         /*!< The remaining number of commands to be transmitted. */
+    uint32_t          txSize;          /*!< The remaining number of bytes to be transmitted. */
+    uint32_t          rxSize;          /*!< The remaining number of bytes to be received. */
+    bool              isBusy;          /*!< True if there is an active transmission. */
+    uint32_t          operateDir;      /*!< Overall I2C bus operating direction. */
+    uint32_t          currentDir;      /*!< Current Data transfer direction. */
+    uint32_t          currentMode;     /*!< Current I2C Bus role of this module. */
+    SemaphoreHandle_t xSemaphore;      /*!< I2C internal synchronize semaphore. */
+} volatile i2c_handle_t;
+
+typedef struct _i2c_xfer_init_config {
+    I2C_Type         *base;            /*!< The base address of I2C instance. */
+    i2c_init_config_t config;          /*!< The I2C module low-level initialize structure. */
+    IRQn_Type         irqNum;          /*!< The interrupt interrupt request number. */
+    uint8_t           irqPrio;         /*!< The interrupt interrupt request priority. */
+} i2c_xfer_init_config_t;
 
 /* Function prototypes */
 #if defined(__cplusplus)
 extern "C" {
 #endif
 
-void I2C_XFER_Config(i2c_init_config_t* initConfig);
-bool I2C_XFER_SendDataBlocking(const uint8_t* cmdBuff, uint32_t cmdSize, const uint8_t* txBuffer, uint32_t txSize);
-uint32_t I2C_XFER_GetSendStatus(void);
-bool I2C_XFER_ReceiveDataBlocking(const uint8_t* cmdBuff, uint32_t cmdSize, uint8_t* rxBuffer, uint32_t rxSize);
-uint32_t I2C_XFER_GetReceiveStatus(void);
+void I2C_XFER_Init(i2c_handle_t *handle, i2c_xfer_init_config_t *initConfig);
+bool I2C_XFER_SendDataBlocking(i2c_handle_t *handle, const uint8_t *cmdBuff, uint32_t cmdSize,
+                               const uint8_t *txBuffer, uint32_t txSize);
+uint32_t I2C_XFER_GetSendStatus(i2c_handle_t *handle);
+bool I2C_XFER_ReceiveDataBlocking(i2c_handle_t *handle, const uint8_t* cmdBuff, uint32_t cmdSize,
+                                  uint8_t* rxBuffer, uint32_t rxSize);
+uint32_t I2C_XFER_GetReceiveStatus(i2c_handle_t *handle);
+void I2C_XFER_Handler(i2c_handle_t *handle);
 
 #ifdef __cplusplus
 }

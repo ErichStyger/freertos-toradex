@@ -22,43 +22,44 @@ SET(CMAKE_EXECUTABLE_LIBRARY_SUFFIX)
 SET(ProjDirPath ${CMAKE_CURRENT_SOURCE_DIR})
 
 # DEBUG LINK FILE
-set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -T${ProjDirPath}/../../../../../platform/devices/MCIMX7D/linker/gcc/MCIMX7D_M4_QSPIB.ld  -static")
+set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -T${ProjDirPath}/../../../../../platform/devices/MCIMX7D/linker/gcc/MCIMX7D_M4_qspib.ld  -static")
 
 # RELEASE LINK FILE
-set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -T${ProjDirPath}/../../../../../platform/devices/MCIMX7D/linker/gcc/MCIMX7D_M4_QSPIB.ld  -static")
+set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -T${ProjDirPath}/../../../../../platform/devices/MCIMX7D/linker/gcc/MCIMX7D_M4_qspib.ld  -static")
 
 # DEBUG ASM FLAGS
-SET(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mapcs  -std=gnu99")
+SET(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -mapcs  -std=gnu99")
 
 # DEBUG C FLAGS
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -MMD  -MP  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mapcs  -std=gnu99")
+SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g  -O0  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -MMD  -MP  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -mapcs  -std=gnu99")
 
 # DEBUG LD FLAGS
-SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  --specs=nano.specs  -lm  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mthumb  -mapcs  -Xlinker --gc-sections  -Xlinker -static  -Xlinker -z  -Xlinker muldefs  -Xlinker --defsym=__stack_size__=0x400  -Xlinker --defsym=__heap_size__=0x200")
+SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  --specs=nano.specs  -lm  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mthumb  -mapcs  -Xlinker --gc-sections  -Xlinker -static  -Xlinker -z  -Xlinker muldefs")
 
 # RELEASE ASM FLAGS
-SET(CMAKE_ASM_FLAGS_RELEASE "${CMAKE_ASM_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mapcs  -std=gnu99")
+SET(CMAKE_ASM_FLAGS_RELEASE "${CMAKE_ASM_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -mapcs  -std=gnu99")
 
 # RELEASE C FLAGS
-SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -MMD  -MP  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mapcs  -std=gnu99")
+SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Os  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -MMD  -MP  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -mapcs  -std=gnu99")
 
 # RELEASE LD FLAGS
-SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  --specs=nano.specs  -lm  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mthumb  -mapcs  -Xlinker --gc-sections  -Xlinker -static  -Xlinker -z  -Xlinker muldefs  -Xlinker --defsym=__stack_size__=0x400  -Xlinker --defsym=__heap_size__=0x200")
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  --specs=nano.specs  -lm  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mthumb  -mapcs  -Xlinker --gc-sections  -Xlinker -static  -Xlinker -z  -Xlinker muldefs")
 
 # ASM MACRO
 SET(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS_DEBUG}  -D__DEBUG")
 
 # C MACRO
 SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}  -D__DEBUG")
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}  -DCPU_IMX7D_M4")
+SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}  -DCPU_MCIMX7D_M4")
 SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -D__NDEBUG")
-SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -DCPU_IMX7D_M4")
+SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -DCPU_MCIMX7D_M4")
 
 # CXX MACRO
 
 # INCLUDE_DIRECTORIES
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../..)
+    INCLUDE_DIRECTORIES(${ProjDirPath}/..)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/GCC/ARM_CM4F)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/CMSIS/Include)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/devices)
@@ -68,8 +69,10 @@ IF(CMAKE_BUILD_TYPE MATCHES Debug)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/include)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/utilities/inc)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../..)
+    INCLUDE_DIRECTORIES(${ProjDirPath}/..)
 ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../..)
+    INCLUDE_DIRECTORIES(${ProjDirPath}/..)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/GCC/ARM_CM4F)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/CMSIS/Include)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/devices)
@@ -79,6 +82,7 @@ ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/include)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/utilities/inc)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../..)
+    INCLUDE_DIRECTORIES(${ProjDirPath}/..)
 ENDIF()
 
 # ADD_EXECUTABLE
@@ -87,7 +91,7 @@ ADD_EXECUTABLE(hello_world_qspi
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h"
     "${ProjDirPath}/../../../../../platform/devices/MCIMX7D/startup/gcc/startup_MCIMX7D_M4.S"
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/MemMang/heap_2.c"
-    "${ProjDirPath}/../../../FreeRTOSConfig.h"
+    "${ProjDirPath}/../FreeRTOSConfig.h"
     "${ProjDirPath}/../../hello_world/main.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/uart_imx.c"
     "${ProjDirPath}/../../../../../platform/drivers/inc/uart_imx.h"
@@ -105,6 +109,7 @@ ADD_EXECUTABLE(hello_world_qspi
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/include/timers.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/ccm_analog_imx7d.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/ccm_imx7d.h"
+    "${ProjDirPath}/../../../../../platform/drivers/inc/lmem.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/rdc.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/rdc_defs_imx7d.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/wdog_imx.h"
@@ -116,6 +121,7 @@ ADD_EXECUTABLE(hello_world_qspi
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/timers.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/ccm_analog_imx7d.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/ccm_imx7d.c"
+    "${ProjDirPath}/../../../../../platform/drivers/src/lmem.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/rdc.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/wdog_imx.c"
     "${ProjDirPath}/../../../../../platform/utilities/src/debug_console_imx.c"
@@ -130,7 +136,7 @@ ADD_EXECUTABLE(hello_world_qspi
     "${ProjDirPath}/../../../board.h"
     "${ProjDirPath}/../../../clock_freq.c"
     "${ProjDirPath}/../../../clock_freq.h"
-    "${ProjDirPath}/../../hello_world/hardware_init.c"
+    "${ProjDirPath}/../hardware_init.c"
 )
 SET_TARGET_PROPERTIES(hello_world_qspi PROPERTIES OUTPUT_NAME "hello_world_qspi.elf")
 

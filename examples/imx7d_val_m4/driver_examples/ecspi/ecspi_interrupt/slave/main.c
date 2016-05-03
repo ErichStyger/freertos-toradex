@@ -39,7 +39,7 @@
 #define FIRST_DATA                         0xFF
 
 /* ECSPI module slave mode configure */
-static void ECSPI_SlaveConfig(ecspi_init_t* initConfig);
+static void ECSPI_SlaveConfig(ecspi_init_config_t* initConfig);
 /* ECSPI slave mode transfer Status */
 static bool ECSPI_SlaveGetTransferStatus(void);
 
@@ -53,7 +53,7 @@ int main(void)
 {
     uint8_t i;
 
-    ecspi_init_t ecspiSlaveInitConfig = {
+    ecspi_init_config_t ecspiSlaveInitConfig = {
         .clockRate = 0,
         .baudRate = 0,
         .mode = ecspiSlaveMode,
@@ -118,7 +118,7 @@ static bool ECSPI_SlaveGetTransferStatus(void)
 * Comments: ECSPI slave initialize
 * 
 ******************************************************************************/
-static void ECSPI_SlaveConfig(ecspi_init_t* initConfig)
+static void ECSPI_SlaveConfig(ecspi_init_config_t* initConfig)
 {
     /* Initialize ECSPI, parameter configure */
     ECSPI_Init(BOARD_ECSPI_SLAVE_BASEADDR, initConfig);

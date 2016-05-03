@@ -46,9 +46,11 @@ void BOARD_ClockInit(void)
     CCM_UpdateRoot(CCM, ccmRootWdog, ccmRootmuxWdogOsc24m, 0, 0);
     CCM_EnableRoot(CCM, ccmRootWdog);
     CCM_ControlGate(CCM, ccmCcgrGateWdog3, ccmClockNeededRun);
+
+    RDC_SetPdapAccess(RDC, BOARD_WDOG_RDC_PDAP, 3 << (BOARD_DOMAIN_ID * 2), false, false);
     WDOG_DisablePowerdown(BOARD_WDOG_BASEADDR);
+
     CCM_ControlGate(CCM, ccmCcgrGateWdog3, ccmClockNotNeeded);
-    CCM_DisableRoot(CCM, ccmRootWdog);
 
     /* We need system PLL Div2 to run M4 core */
     CCM_ControlGate(CCM, ccmPllGateSys, ccmClockNeededRun);

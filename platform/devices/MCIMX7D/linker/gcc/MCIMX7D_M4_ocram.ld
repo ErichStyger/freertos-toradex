@@ -1,30 +1,81 @@
+/*
+** ###################################################################
+**     Processors:          MCIMX7D7DVK10SA
+**                          MCIMX7D7DVM10SA
+**                          MCIMX7D3DVK10SA
+**                          MCIMX7D3EVM10SA
+**
+**     Compiler:            GNU C Compiler
+**     Reference manual:    IMX7DRM, Rev.A, February 2015
+**     Version:             rev. 1.0, 2015-05-19
+**
+**     Abstract:
+**         Linker file for the GNU C Compiler
+**
+**     Copyright (c) 2015 Freescale Semiconductor, Inc.
+**     All rights reserved.
+**
+**     Redistribution and use in source and binary forms, with or without modification,
+**     are permitted provided that the following conditions are met:
+**
+**     o Redistributions of source code must retain the above copyright notice, this list
+**       of conditions and the following disclaimer.
+**
+**     o Redistributions in binary form must reproduce the above copyright notice, this
+**       list of conditions and the following disclaimer in the documentation and/or
+**       other materials provided with the distribution.
+**
+**     o Neither the name of Freescale Semiconductor, Inc. nor the names of its
+**       contributors may be used to endorse or promote products derived from this
+**       software without specific prior written permission.
+**
+**     THIS SOFTWARE IS PROVIDED BY THE COPYRIGHT HOLDERS AND CONTRIBUTORS "AS IS" AND
+**     ANY EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
+**     WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
+**     DISCLAIMED. IN NO EVENT SHALL THE COPYRIGHT HOLDER OR CONTRIBUTORS BE LIABLE FOR
+**     ANY DIRECT, INDIRECT, INCIDENTAL, SPECIAL, EXEMPLARY, OR CONSEQUENTIAL DAMAGES
+**     (INCLUDING, BUT NOT LIMITED TO, PROCUREMENT OF SUBSTITUTE GOODS OR SERVICES;
+**     LOSS OF USE, DATA, OR PROFITS; OR BUSINESS INTERRUPTION) HOWEVER CAUSED AND ON
+**     ANY THEORY OF LIABILITY, WHETHER IN CONTRACT, STRICT LIABILITY, OR TORT
+**     (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
+**     SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
+**
+**     http:                 www.freescale.com
+**     mail:                 support@freescale.com
+**
+** ###################################################################
+*/
+
 /* Entry Point */
 ENTRY(Reset_Handler)
 
-STACK_SIZE = 0x400;
-HEAP_SIZE = 0x200;
+HEAP_SIZE  = DEFINED(__heap_size__)  ? __heap_size__  : 0x0400;
+STACK_SIZE = DEFINED(__stack_size__) ? __stack_size__ : 0x0400;
+
 /* Specify the memory areas */
 MEMORY
 {
-  m_text          (RX)  : ORIGIN = 0x00920000, LENGTH = 0x00020000
-
-  m_data          (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00007FFF
+  m_interrupts          (RX)  : ORIGIN = 0x20210000, LENGTH = 0x00000240
+  m_text                (RX)  : ORIGIN = 0x20210240, LENGTH = 0x00007DC0
+  m_data                (RW)  : ORIGIN = 0x20000000, LENGTH = 0x00008000
 }
 
+__FLASH_START = ORIGIN(m_interrupts);
+__FLASH_END   = ORIGIN(m_text) + LENGTH(m_text);
+
+/* Define output sections */
 SECTIONS
 {
+  /* The startup code goes first into Flash */
   .interrupts :
   {
     __VECTOR_TABLE = .;
     . = ALIGN(4);
     KEEP(*(.isr_vector))     /* Startup code */
     . = ALIGN(4);
-  } > m_text
+  } > m_interrupts
 
-  __VECTOR_RAM = __VECTOR_TABLE;
-  __RAM_VECTOR_TABLE_SIZE_BYTES = 0x0;
-
-
+  /* The program code and other data goes into Flash */
   .text :
   {
     . = ALIGN(4);
@@ -126,6 +177,8 @@ SECTIONS
   } > m_data
 
   __DATA_END = __DATA_ROM + (__data_end__ - __data_start__);
+  text_end = ORIGIN(m_text) + LENGTH(m_text);
+  ASSERT(__DATA_END <= text_end, "region m_text overflowed with text and data")
 
   /* Uninitialized data section */
   .bss :
@@ -151,16 +204,19 @@ SECTIONS
     . += HEAP_SIZE;
     __HeapLimit = .;
   } > m_data
-    .stack :
+
+  .stack :
   {
     . = ALIGN(8);
     . += STACK_SIZE;
   } > m_data
-   /* Initializes stack on the end of block */
+
+  /* Initializes stack on the end of block */
   __StackTop   = ORIGIN(m_data) + LENGTH(m_data);
   __StackLimit = __StackTop - STACK_SIZE;
   PROVIDE(__stack = __StackTop);
+
   .ARM.attributes 0 : { *(.ARM.attributes) }
 
   ASSERT(__StackLimit >= __HeapLimit, "region m_data overflowed with stack and heap")
- }
+}

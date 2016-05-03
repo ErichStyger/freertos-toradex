@@ -34,49 +34,27 @@
 #include "i2c_xfer.h"
 #include "mpl3115.h"
 
-#define MPL3115_MPERCOUNT  0.0000152587890625F      // 1/65536 fixed range for MPL3115
-#define MPL3115_CPERCPOUNT 0.00390625F              // 1/256 fixed range for MPL3115
-
 /*FUNCTION****************************************************************
 *
-* Function Name    : mpl3115_init
+* Function Name    : MPL3115_Init
 * Returned Value   : result
 * Comments         : Initialize MPL3115 pressure and temperature sensor.
 *
 *END*********************************************************************/
-bool mpl3115_init(pressure_sensor_t* pThisPressure)
+bool MPL3115_Init(mpl_handle_t *handle, const mpl3115_init_t *mpl3115_config)
 {
-    uint8_t txBuffer;
-    uint8_t cmdBuffer[2];
-
-    pThisPressure->fmPerCount = MPL3115_MPERCOUNT;
-    pThisPressure->fCPerCount = MPL3115_CPERCPOUNT;
-
+    uint8_t regVal;
     /* Place the MPL3115 in Standby */
-    cmdBuffer[0] = MPL3115_ADDRESS << 1;
-    cmdBuffer[1] = MPL3115_CTRL_REG1;
-    txBuffer = 0x00;
-    if (!I2C_XFER_SendDataBlocking(cmdBuffer, 2, &txBuffer, 1))
+    if (!MPL3115_WriteReg(handle, MPL3115_CTRL_REG1, 0x00))
         return false;
 
-    /* Enable Data Flags in PT_DATA_CFG */
-    cmdBuffer[0] = MPL3115_ADDRESS << 1;
-    cmdBuffer[1] = MPL3115_PT_DATA_CFG;
-    txBuffer = 0x07;
-    if (!I2C_XFER_SendDataBlocking(cmdBuffer, 2, &txBuffer, 1))
-        return false;
+    // Set CTRL_REG1 according to mpl3115 init struct and switch it
+    // to active mode.
+    regVal = ((uint8_t)mpl3115_config->outputFormat    |
+              (uint8_t)mpl3115_config->outputMode      |
+              (uint8_t)mpl3115_config->oversampleRatio);
 
-    // write 1011 1001 = 0xB9 to configure MPL3115 and enter Active mode
-    // [7]: ALT=1 for altitude measurements
-    // [6]: RAW=0 to disable raw measurements
-    // [5-3]: OS=111 for OS ratio=128 for maximum internal averaging with 512ms output interval
-    // [2]: RST=0 do not enter reset
-    // [1]: OST=0 do not initiate a reading
-    // [0]: SBYB=1 to enter active mode
-    cmdBuffer[0] = MPL3115_ADDRESS << 1;
-    cmdBuffer[1] = MPL3115_CTRL_REG1;
-    txBuffer = 0xB9;
-    if (!I2C_XFER_SendDataBlocking(cmdBuffer, 2, &txBuffer, 1))
+    if (!MPL3115_WriteReg(handle, MPL3115_CTRL_REG1, regVal))
         return false;
 
     return true;
@@ -84,12 +62,113 @@ bool mpl3115_init(pressure_sensor_t* pThisPressure)
 
 /*FUNCTION****************************************************************
 *
-* Function Name    : mpl3115_read_data
+* Function Name    : MPL3115_Deinit
+* Returned Value   : result
+* Comments         : Deinit the mpl3115 sensor.
+*
+*END*********************************************************************/
+bool MPL3115_Deinit(mpl_handle_t *handle)
+{
+    // Switch mpl3115 to STANDBY mode.
+    if (!MPL3115_WriteReg(handle, MPL3115_CTRL_REG1, 0x00))
+        return false;
+
+    // Reset all Register content.
+    if (!MPL3115_WriteReg(handle, MPL3115_CTRL_REG1, 0x04))
+        return false;
+
+    return true;
+}
+
+/*FUNCTION****************************************************************
+*
+* Function Name    : MPL3115_Enable
+* Returned Value   : result
+* Comments         : Enable the MPL3115 sensor.
+*
+*END*********************************************************************/
+bool MPL3115_Enable(mpl_handle_t *handle)
+{
+    uint8_t regVal;
+
+    if (!MPL3115_ReadReg(handle, MPL3115_CTRL_REG1, &regVal))
+        return false;
+
+    /* Active MPL3115 */
+    regVal |= 0x01;
+
+    if (!MPL3115_WriteReg(handle, MPL3115_CTRL_REG1, regVal))
+        return false;
+
+    return true;
+}
+
+/*FUNCTION****************************************************************
+*
+* Function Name    : MPL3115_Disable
+* Returned Value   : result
+* Comments         : Disable the MPL3115 sensor.
+*
+*END*********************************************************************/
+bool MPL3115_Disable(mpl_handle_t *handle)
+{
+    uint8_t regVal;
+
+    if (!MPL3115_ReadReg(handle, MPL3115_CTRL_REG1, &regVal))
+        return false;
+
+    /* De-active MPL3115 */
+    regVal &= ~0x01;
+
+    if (!MPL3115_WriteReg(handle, MPL3115_CTRL_REG1, regVal))
+        return false;
+
+    return true;
+}
+
+/*FUNCTION****************************************************************
+*
+* Function Name    : MPL3115_WriteReg
+* Returned Value   : result
+* Comments         : Write to MPL3115 single register.
+*
+*END*********************************************************************/
+bool MPL3115_WriteReg(mpl_handle_t *handle, uint8_t regAddr, uint8_t regVal)
+{
+    uint8_t cmdBuffer[2];
+
+    cmdBuffer[0] = MPL3115_ADDRESS << 1;
+    cmdBuffer[1] = regAddr;
+
+    return I2C_XFER_SendDataBlocking(handle->device, cmdBuffer, 2, &regVal, 1);
+}
+
+/*FUNCTION****************************************************************
+*
+* Function Name    : MPL3115_ReadReg
+* Returned Value   : result
+* Comments         : Read from MPL3115 single register.
+*
+*END*********************************************************************/
+bool MPL3115_ReadReg(mpl_handle_t *handle, uint8_t regAddr, uint8_t *regValPtr)
+{
+    uint8_t cmdBuffer[3];
+
+    cmdBuffer[0] = MPL3115_ADDRESS << 1;
+    cmdBuffer[1] = regAddr;
+    cmdBuffer[2] = (MPL3115_ADDRESS << 1) + 1;
+
+    return I2C_XFER_ReceiveDataBlocking(handle->device, cmdBuffer, 3, regValPtr, 1);
+}
+
+/*FUNCTION****************************************************************
+*
+* Function Name    : MPL3115_ReadData
 * Returned Value   : result
 * Comments         : Get current height and temperature from mpl3115.
 *
 *END*********************************************************************/
-bool mpl3115_read_data(pressure_sensor_t* pThisPressure)
+bool MPL3115_ReadData(mpl_handle_t *handle, mpl3115_data_t *val)
 {
     uint8_t rxBuffer[5];
     uint8_t cmdBuffer[3];
@@ -97,12 +176,12 @@ bool mpl3115_read_data(pressure_sensor_t* pThisPressure)
     cmdBuffer[0] = MPL3115_ADDRESS << 1;
     cmdBuffer[1] = MPL3115_OUT_P_MSB;
     cmdBuffer[2] = (MPL3115_ADDRESS << 1) + 1;
-    if (!I2C_XFER_ReceiveDataBlocking(cmdBuffer, 3, rxBuffer, 5))
+    if (!I2C_XFER_ReceiveDataBlocking(handle->device, cmdBuffer, 3, rxBuffer, 5))
         return false;
 
-    // place the read buffer into the 32 bit altitude and 16 bit temperature
-    pThisPressure->iHpFast = (rxBuffer[0] << 24) | (rxBuffer[1] << 16) | (rxBuffer[2] << 8);
-    pThisPressure->iTpFast = (rxBuffer[3] << 8) | rxBuffer[4];
+    // place the read buffer into the 32 bit pressure/altitude and 16 bit temperature.
+    val->presData = (rxBuffer[0] << 24) | (rxBuffer[1] << 16) | (rxBuffer[2] << 8);
+    val->tempData = (rxBuffer[3] << 8) | rxBuffer[4];
 
     return true;
 }

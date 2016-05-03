@@ -61,8 +61,8 @@
 #define BOARD_SEMA4_RDC_PDAP                  rdcPdapSemaphoreHs
 #define BOARD_SEMA4_CCM_CCGR                  ccmCcgrGateSemaHs
 #define BOARD_SEMA4_BASEADDR                  SEMA4
-#define BOARD_SEMA4_IRQ_NUM                   HS1_IRQn
-#define BOARD_SEMA4_HANDLER                   SEMA4_Handler
+#define BOARD_SEMA4_IRQ_NUM                   SEMA4_HS_M4_IRQn
+#define BOARD_SEMA4_HANDLER                   SEMA4_HS_M4_Handler
 
 /* GPT instance A information for this board */
 #define BOARD_GPTA_RDC_PDAP                   rdcPdapGpt3
@@ -80,11 +80,17 @@
 #define BOARD_GPTB_HANDLER                    GPT4_Handler
 
 /* GPIO information for this board */
-#define BOARD_GPIO_CCM_CCGR                   ccmCcgrGateGpio5
+#define BOARD_GPIO_KEY_CCM_CCGR               ccmCcgrGateGpio5
 #define BOARD_GPIO_KEY_RDC_PDAP               rdcPdapGpio5
 #define BOARD_GPIO_KEY_CONFIG                 (&gpioKeyFunc1)
 #define BOARD_GPIO_KEY_IRQ_NUM                GPIO5_INT15_0_IRQn
 #define BOARD_GPIO_KEY_HANDLER                GPIO5_INT15_0_Handler
+
+#define BOARD_GPIO_SENSOR_CCM_CCGR            ccmCcgrGateGpio6
+#define BOARD_GPIO_SENSOR_RDC_PDAP            rdcPdapGpio6
+#define BOARD_GPIO_SENSOR_CONFIG              (&gpioSensorInt)
+#define BOARD_GPIO_SENSOR_IRQ_NUM             GPIO6_INT15_0_IRQn
+#define BOARD_GPIO_SENSOR_HANDLER             GPIO6_INT15_0_Handler
 
 /* Debug UART information for this board */
 #define BOARD_DEBUG_UART_RDC_PDAP             rdcPdapUart2
@@ -95,9 +101,9 @@
 #define BOARD_DEBUG_UART_HANDLER              UART2_Handler
 
 /* MU information for this board*/
-#define BOARD_MU_HANDLER                      MU_Handler
-#define BOARD_MU_IRQ_NUM                      MU_INT_M4_IRQn
-#define BOARD_MU_BASE_ADDR                    MU0_B
+#define BOARD_MU_HANDLER                      MU_M4_Handler
+#define BOARD_MU_IRQ_NUM                      MU_M4_IRQn
+#define BOARD_MU_BASE_ADDR                    MUB
 #define BOARD_MU_CCM_CCGR                     ccmCcgrGateMu
 #define BOARD_MU_RDC_PDAP                     rdcPdapMuB
 
@@ -119,6 +125,8 @@
 #define BOARD_FLEXCAN_IRQ_NUM                 FLEXCAN2_IRQn
 #define BOARD_FLEXCAN_HANDLER                 FLEXCAN2_Handler
 
+/* GPC information for this board*/
+#define BOARD_GPC_BASEADDR                    GPC
 
 #if defined(__cplusplus)
 extern "C" {

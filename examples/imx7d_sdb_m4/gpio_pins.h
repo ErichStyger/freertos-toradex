@@ -52,6 +52,7 @@ extern "C" {
 /*! @brief GPIO pin configuration */
 extern gpio_config_t gpioKeyFunc1;
 extern gpio_config_t gpioKeyFunc2;
+extern gpio_config_t gpioSensorInt;
 
 /*! @brief Configure specific GPIO pin */
 void configure_gpio_pin(gpio_config_t *config);

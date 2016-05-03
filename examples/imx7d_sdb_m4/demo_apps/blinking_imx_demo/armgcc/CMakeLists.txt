@@ -28,37 +28,38 @@ set(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -T${ProjDirPat
 set(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -T${ProjDirPath}/../../../../../platform/devices/MCIMX7D/linker/gcc/MCIMX7D_M4_tcm.ld  -static")
 
 # DEBUG ASM FLAGS
-SET(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mapcs  -std=gnu99")
+SET(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -mapcs  -std=gnu99")
 
 # DEBUG C FLAGS
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -MMD  -MP  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mapcs  -std=gnu99")
+SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG} -g  -O0  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -MMD  -MP  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -mapcs  -std=gnu99")
 
 # DEBUG LD FLAGS
-SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  --specs=nano.specs  -lm  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mthumb  -mapcs  -Xlinker --gc-sections  -Xlinker -static  -Xlinker -z  -Xlinker muldefs  -Xlinker --defsym=__stack_size__=0x400  -Xlinker --defsym=__heap_size__=0x200")
+SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG} -g  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  --specs=nano.specs  -lm  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mthumb  -mapcs  -Xlinker --gc-sections  -Xlinker -static  -Xlinker -z  -Xlinker muldefs")
 
 # RELEASE ASM FLAGS
-SET(CMAKE_ASM_FLAGS_RELEASE "${CMAKE_ASM_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mapcs  -std=gnu99")
+SET(CMAKE_ASM_FLAGS_RELEASE "${CMAKE_ASM_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -mapcs  -std=gnu99")
 
 # RELEASE C FLAGS
-SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -MMD  -MP  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mapcs  -std=gnu99")
+SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE} -Os  -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  -mthumb  -MMD  -MP  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -mapcs  -std=gnu99")
 
 # RELEASE LD FLAGS
-SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  --specs=nano.specs  -lm  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mthumb  -mapcs  -Xlinker --gc-sections  -Xlinker -static  -Xlinker -z  -Xlinker muldefs  -Xlinker --defsym=__stack_size__=0x400  -Xlinker --defsym=__heap_size__=0x200")
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE} -mcpu=cortex-m4  -mfloat-abi=hard  -mfpu=fpv4-sp-d16  --specs=nano.specs  -lm  -Wall  -fno-common  -ffunction-sections  -fdata-sections  -ffreestanding  -fno-builtin  -Os  -mthumb  -mapcs  -Xlinker --gc-sections  -Xlinker -static  -Xlinker -z  -Xlinker muldefs")
 
 # ASM MACRO
 SET(CMAKE_ASM_FLAGS_DEBUG "${CMAKE_ASM_FLAGS_DEBUG}  -D__DEBUG")
 
 # C MACRO
 SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}  -D__DEBUG")
-SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}  -DCPU_IMX7D_M4")
+SET(CMAKE_C_FLAGS_DEBUG "${CMAKE_C_FLAGS_DEBUG}  -DCPU_MCIMX7D_M4")
 SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -D__NDEBUG")
-SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -DCPU_IMX7D_M4")
+SET(CMAKE_C_FLAGS_RELEASE "${CMAKE_C_FLAGS_RELEASE}  -DCPU_MCIMX7D_M4")
 
 # CXX MACRO
 
 # INCLUDE_DIRECTORIES
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../..)
+    INCLUDE_DIRECTORIES(${ProjDirPath}/..)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/GCC/ARM_CM4F)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/CMSIS/Include)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/devices)
@@ -68,8 +69,10 @@ IF(CMAKE_BUILD_TYPE MATCHES Debug)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/include)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/utilities/inc)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../..)
+    INCLUDE_DIRECTORIES(${ProjDirPath}/..)
 ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../..)
+    INCLUDE_DIRECTORIES(${ProjDirPath}/..)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/GCC/ARM_CM4F)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/CMSIS/Include)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/devices)
@@ -79,18 +82,19 @@ ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/include)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../../../../platform/utilities/inc)
     INCLUDE_DIRECTORIES(${ProjDirPath}/../../..)
+    INCLUDE_DIRECTORIES(${ProjDirPath}/..)
 ENDIF()
 
 # ADD_EXECUTABLE
-ADD_EXECUTABLE(blinking_imx_demo 
+ADD_EXECUTABLE(blinking_imx_demo_gpt 
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/GCC/ARM_CM4F/port.c"
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/GCC/ARM_CM4F/portmacro.h"
     "${ProjDirPath}/../../../../../platform/devices/MCIMX7D/startup/gcc/startup_MCIMX7D_M4.S"
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/MemMang/heap_2.c"
-    "${ProjDirPath}/../../../FreeRTOSConfig.h"
+    "${ProjDirPath}/../FreeRTOSConfig.h"
     "${ProjDirPath}/../main.c"
     "${ProjDirPath}/../gpt_timer.c"
-    "${ProjDirPath}/../gpt_timer.h"
+    "${ProjDirPath}/../hw_timer.h"
     "${ProjDirPath}/../gpio_ctrl.c"
     "${ProjDirPath}/../gpio_ctrl.h"
     "${ProjDirPath}/../../../../../platform/drivers/src/gpio_imx.c"
@@ -115,6 +119,7 @@ ADD_EXECUTABLE(blinking_imx_demo
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/include/timers.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/ccm_analog_imx7d.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/ccm_imx7d.h"
+    "${ProjDirPath}/../../../../../platform/drivers/inc/lmem.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/rdc.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/rdc_defs_imx7d.h"
     "${ProjDirPath}/../../../../../platform/drivers/inc/wdog_imx.h"
@@ -126,6 +131,7 @@ ADD_EXECUTABLE(blinking_imx_demo
     "${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/timers.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/ccm_analog_imx7d.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/ccm_imx7d.c"
+    "${ProjDirPath}/../../../../../platform/drivers/src/lmem.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/rdc.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/wdog_imx.c"
     "${ProjDirPath}/../../../../../platform/utilities/src/debug_console_imx.c"
@@ -144,25 +150,25 @@ ADD_EXECUTABLE(blinking_imx_demo
     "${ProjDirPath}/../../../gpio_pins.c"
     "${ProjDirPath}/../../../gpio_pins.h"
 )
-SET_TARGET_PROPERTIES(blinking_imx_demo PROPERTIES OUTPUT_NAME "blinking_imx_demo.elf")
+SET_TARGET_PROPERTIES(blinking_imx_demo_gpt PROPERTIES OUTPUT_NAME "blinking_imx_demo_gpt.elf")
 
-TARGET_LINK_LIBRARIES(blinking_imx_demo -Wl,--start-group)
+TARGET_LINK_LIBRARIES(blinking_imx_demo_gpt -Wl,--start-group)
 # LIBRARIES
 IF(CMAKE_BUILD_TYPE MATCHES Debug)
 ELSEIF(CMAKE_BUILD_TYPE MATCHES Release)
 ENDIF()
 
 # SYSTEM LIBRARIES
-TARGET_LINK_LIBRARIES(blinking_imx_demo m)
-TARGET_LINK_LIBRARIES(blinking_imx_demo c)
-TARGET_LINK_LIBRARIES(blinking_imx_demo gcc)
-TARGET_LINK_LIBRARIES(blinking_imx_demo nosys)
-TARGET_LINK_LIBRARIES(blinking_imx_demo -Wl,--end-group)
+TARGET_LINK_LIBRARIES(blinking_imx_demo_gpt m)
+TARGET_LINK_LIBRARIES(blinking_imx_demo_gpt c)
+TARGET_LINK_LIBRARIES(blinking_imx_demo_gpt gcc)
+TARGET_LINK_LIBRARIES(blinking_imx_demo_gpt nosys)
+TARGET_LINK_LIBRARIES(blinking_imx_demo_gpt -Wl,--end-group)
 
 # MAP FILE
-SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}  -Xlinker -Map=debug/blinking_imx_demo.map")
-SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE}  -Xlinker -Map=release/blinking_imx_demo.map")
+SET(CMAKE_EXE_LINKER_FLAGS_DEBUG "${CMAKE_EXE_LINKER_FLAGS_DEBUG}  -Xlinker -Map=debug/blinking_imx_demo_gpt.map")
+SET(CMAKE_EXE_LINKER_FLAGS_RELEASE "${CMAKE_EXE_LINKER_FLAGS_RELEASE}  -Xlinker -Map=release/blinking_imx_demo_gpt.map")
 
 # BIN AND HEX
-ADD_CUSTOM_COMMAND(TARGET blinking_imx_demo POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Oihex ${EXECUTABLE_OUTPUT_PATH}/blinking_imx_demo.elf ${EXECUTABLE_OUTPUT_PATH}/blinking_imx_demo.hex)
-ADD_CUSTOM_COMMAND(TARGET blinking_imx_demo POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Obinary ${EXECUTABLE_OUTPUT_PATH}/blinking_imx_demo.elf ${EXECUTABLE_OUTPUT_PATH}/blinking_imx_demo.bin)
+ADD_CUSTOM_COMMAND(TARGET blinking_imx_demo_gpt POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Oihex ${EXECUTABLE_OUTPUT_PATH}/blinking_imx_demo_gpt.elf ${EXECUTABLE_OUTPUT_PATH}/blinking_imx_demo_gpt.hex)
+ADD_CUSTOM_COMMAND(TARGET blinking_imx_demo_gpt POST_BUILD COMMAND ${CMAKE_OBJCOPY} -Obinary ${EXECUTABLE_OUTPUT_PATH}/blinking_imx_demo_gpt.elf ${EXECUTABLE_OUTPUT_PATH}/blinking_imx_demo_gpt.bin)

@@ -28,294 +28,313 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 #include "FreeRTOS.h"
+#include "task.h"
 #include "semphr.h"
 #include "device_imx.h"
 #include "i2c_imx.h"
-#include "board.h"
+#include "i2c_xfer.h"
 
-typedef struct _i2c_state {
-    const uint8_t*    cmdBuff;         /*!< The buffer of I2C command. */
-    const uint8_t*    txBuff;          /*!< The buffer of data being sent.*/
-    uint8_t*          rxBuff;          /*!< The buffer of received data. */
-    uint32_t          cmdSize;         /*!< The remaining number of commands to be transmitted. */
-    uint32_t          txSize;          /*!< The remaining number of bytes to be transmitted. */
-    uint32_t          rxSize;          /*!< The remaining number of bytes to be received. */
-    bool              isBusy;          /*!< True if there is an active transmission. */
-    uint32_t          operateDir;      /*!< Overall I2C bus operating direction. */
-    uint32_t          currentDir;      /*!< Current Data transfer direction. */
-    uint32_t          currentMode;     /*!< Current I2C Bus role of this module. */
-    SemaphoreHandle_t xSemaphore;      /*!< I2C internal synchronize semaphore. */
-} i2c_state_t;
-
-/* I2C runtime state structure */
-static volatile i2c_state_t i2cState;
-
-void I2C_XFER_Config(i2c_init_config_t* initConfig)
+void I2C_XFER_Init(i2c_handle_t *handle, i2c_xfer_init_config_t *initConfig)
 {
     /* Initialize I2C state structure content. */
-    i2cState.cmdBuff = 0;
-    i2cState.txBuff = 0;
-    i2cState.rxBuff = 0;
-    i2cState.cmdSize = 0;
-    i2cState.txSize = 0;
-    i2cState.rxSize = 0;
-    i2cState.isBusy = false;
-    i2cState.operateDir = i2cDirectionReceive;
-    i2cState.currentDir = i2cDirectionReceive;
-    i2cState.currentMode = i2cModeSlave;
-    i2cState.xSemaphore = xSemaphoreCreateBinary();
+    handle->base        = initConfig->base;
+    handle->irqNum      = initConfig->irqNum;
+    handle->irqPrio     = initConfig->irqPrio;
+    handle->cmdBuff     = 0;
+    handle->txBuff      = 0;
+    handle->rxBuff      = 0;
+    handle->cmdSize     = 0;
+    handle->txSize      = 0;
+    handle->rxSize      = 0;
+    handle->isBusy      = false;
+    handle->operateDir  = i2cDirectionReceive;
+    handle->currentDir  = i2cDirectionReceive;
+    handle->currentMode = i2cModeSlave;
+    handle->xSemaphore  = xSemaphoreCreateBinary();
 
     /* Initialize I2C baud rate, mode, transfer direction and slave address. */
-    I2C_Init(BOARD_I2C_BASEADDR, initConfig);
+    I2C_Init(handle->base, &initConfig->config);
 
     /* Set I2C Interrupt priority */
-    NVIC_SetPriority(BOARD_I2C_IRQ_NUM, 3);
+    NVIC_SetPriority(handle->irqNum, handle->irqPrio);
 
     /* Call core API to enable the IRQ. */
-    NVIC_EnableIRQ(BOARD_I2C_IRQ_NUM);
+    NVIC_EnableIRQ(handle->irqNum);
 
     /* Finally, enable the I2C module */
-    I2C_Enable(BOARD_I2C_BASEADDR);
+    I2C_Enable(handle->base);
 }
 
-bool I2C_XFER_SendDataBlocking(const uint8_t* cmdBuff, uint32_t cmdSize,
-                          const uint8_t* txBuffer, uint32_t txSize)
+bool I2C_XFER_SendDataBlocking(i2c_handle_t *handle, const uint8_t *cmdBuff, uint32_t cmdSize,
+                               const uint8_t *txBuffer, uint32_t txSize)
 {
-    if ((i2cState.isBusy) || (0 == txSize))
+    TickType_t tickOld, tickNew;
+
+    if ((handle->isBusy) || (0 == txSize))
         return false;
 
     /* Initialize i2c transfer struct */
-    i2cState.cmdBuff = cmdBuff;
-    i2cState.cmdSize = cmdSize;
-    i2cState.txBuff = txBuffer;
-    i2cState.txSize = txSize;
-    i2cState.isBusy = true;
-    i2cState.operateDir = i2cDirectionTransmit;
+    handle->cmdBuff = cmdBuff;
+    handle->cmdSize = cmdSize;
+    handle->txBuff  = txBuffer;
+    handle->txSize  = txSize;
+    handle->isBusy  = true;
+    handle->operateDir = i2cDirectionTransmit;
 
     /* Clear I2C interrupt flag to avoid spurious interrupt */
-    I2C_ClearStatusFlag(BOARD_I2C_BASEADDR, i2cStatusInterrupt);
+    I2C_ClearStatusFlag(handle->base, i2cStatusInterrupt);
 
-    if (I2C_GetStatusFlag(BOARD_I2C_BASEADDR, i2cStatusBusBusy))
+    if (I2C_GetStatusFlag(handle->base, i2cStatusBusBusy))
     {
         /* Reset i2c transfer state. */
-        i2cState.operateDir = i2cDirectionReceive;
-        i2cState.isBusy = false;
+        handle->operateDir = i2cDirectionReceive;
+        handle->isBusy = false;
         return false;
     }
 
     /* Set I2C work under Tx mode */
-    I2C_SetDirMode(BOARD_I2C_BASEADDR, i2cDirectionTransmit);
-    i2cState.currentDir = i2cDirectionTransmit;
+    I2C_SetDirMode(handle->base, i2cDirectionTransmit);
+    handle->currentDir = i2cDirectionTransmit;
 
     /* Switch to Master Mode and Send Start Signal. */
-    I2C_SetWorkMode(BOARD_I2C_BASEADDR, i2cModeMaster);
-    i2cState.currentMode = i2cModeMaster;
+    I2C_SetWorkMode(handle->base, i2cModeMaster);
+    handle->currentMode = i2cModeMaster;
 
     if (0 != cmdSize)
     {
-        I2C_WriteByte(BOARD_I2C_BASEADDR, *i2cState.cmdBuff);
-        i2cState.cmdBuff++;
-        i2cState.cmdSize--;
+        I2C_WriteByte(handle->base, *handle->cmdBuff);
+        handle->cmdBuff++;
+        handle->cmdSize--;
     }
     else
     {
-        I2C_WriteByte(BOARD_I2C_BASEADDR, *i2cState.txBuff);
-        i2cState.txBuff++;
-        i2cState.txSize--;
+        I2C_WriteByte(handle->base, *handle->txBuff);
+        handle->txBuff++;
+        handle->txSize--;
     }
 
     /* Enable I2C interrupt, subsequent data transfer will be handled in ISR. */
-    I2C_SetIntCmd(BOARD_I2C_BASEADDR, true);
+    I2C_SetIntCmd(handle->base, true);
 
     /* Wait until send data finish. */
-    xSemaphoreTake(i2cState.xSemaphore, portMAX_DELAY);
+    xSemaphoreTake(handle->xSemaphore, portMAX_DELAY);
+
+    /* Wait bus idle */
+    tickOld = xTaskGetTickCount();
+
+    while (I2C_GetStatusFlag(handle->base, i2cStatusBusBusy))
+    {
+        tickNew = xTaskGetTickCount();
+
+        /* A 50ms time-out to wait bus idle */
+        if ((50 * portTICK_PERIOD_MS) < (tickNew - tickOld))
+            return false;
+    }
 
     return true;
 }
 
-uint32_t I2C_XFER_GetSendStatus(void)
+uint32_t I2C_XFER_GetSendStatus(i2c_handle_t *handle)
 {
-    return i2cState.txSize;
+    return handle->txSize;
 }
 
-bool I2C_XFER_ReceiveDataBlocking(const uint8_t* cmdBuff, uint32_t cmdSize,
-                             uint8_t* rxBuffer, uint32_t rxSize)
+bool I2C_XFER_ReceiveDataBlocking(i2c_handle_t *handle, const uint8_t* cmdBuff, uint32_t cmdSize,
+                                  uint8_t* rxBuffer, uint32_t rxSize)
 {
-    if ((i2cState.isBusy) || (0 == rxSize))
+    TickType_t tickOld, tickNew;
+
+    if ((handle->isBusy) || (0 == rxSize))
         return false;
 
     /* Initialize i2c transfer struct */
-    i2cState.cmdBuff = cmdBuff;
-    i2cState.cmdSize = cmdSize;
-    i2cState.rxBuff = rxBuffer;
-    i2cState.rxSize = rxSize;
-    i2cState.isBusy = true;
-    i2cState.operateDir = i2cDirectionReceive;
+    handle->cmdBuff = cmdBuff;
+    handle->cmdSize = cmdSize;
+    handle->rxBuff  = rxBuffer;
+    handle->rxSize  = rxSize;
+    handle->isBusy  = true;
+    handle->operateDir = i2cDirectionReceive;
 
     /* Clear I2C interrupt flag to avoid spurious interrupt */
-    I2C_ClearStatusFlag(BOARD_I2C_BASEADDR, i2cStatusInterrupt);
+    I2C_ClearStatusFlag(handle->base, i2cStatusInterrupt);
 
-    if (I2C_GetStatusFlag(BOARD_I2C_BASEADDR, i2cStatusBusBusy))
+    if (I2C_GetStatusFlag(handle->base, i2cStatusBusBusy))
     {
         /* Reset i2c transfer state. */
-        i2cState.operateDir = i2cDirectionReceive;
-        i2cState.isBusy = false;
+        handle->operateDir = i2cDirectionReceive;
+        handle->isBusy = false;
         return false;
     }
 
     /* Set I2C work under Tx mode */
-    I2C_SetDirMode(BOARD_I2C_BASEADDR, i2cDirectionTransmit);
-    i2cState.currentDir = i2cDirectionTransmit;
+    I2C_SetDirMode(handle->base, i2cDirectionTransmit);
+    handle->currentDir = i2cDirectionTransmit;
 
     /* Switch to Master Mode and Send Start Signal. */
-    I2C_SetWorkMode(BOARD_I2C_BASEADDR, i2cModeMaster);
-    i2cState.currentMode = i2cModeMaster;
+    I2C_SetWorkMode(handle->base, i2cModeMaster);
+    handle->currentMode = i2cModeMaster;
 
     /* Is there command to be sent before receive data? */
-    if (0 != i2cState.cmdSize)
+    if (0 != handle->cmdSize)
     {
-        if (1 == i2cState.cmdSize)
-            I2C_SendRepeatStart(BOARD_I2C_BASEADDR);
-        I2C_WriteByte(BOARD_I2C_BASEADDR, *i2cState.cmdBuff);
-        i2cState.cmdBuff++;
-        i2cState.cmdSize--;
+        if (1 == handle->cmdSize)
+            I2C_SendRepeatStart(handle->base);
+        I2C_WriteByte(handle->base, *handle->cmdBuff);
+        handle->cmdBuff++;
+        handle->cmdSize--;
     }
     else
     {
         /* Change to receive state. */
-        I2C_SetDirMode(BOARD_I2C_BASEADDR, i2cDirectionReceive);
-        i2cState.currentDir = i2cDirectionReceive;
+        I2C_SetDirMode(handle->base, i2cDirectionReceive);
+        handle->currentDir = i2cDirectionReceive;
 
         if (1 == rxSize)
             /* Send Nack */
-            I2C_SetAckBit(BOARD_I2C_BASEADDR, false);
+            I2C_SetAckBit(handle->base, false);
         else
             /* Send Ack */
-            I2C_SetAckBit(BOARD_I2C_BASEADDR, true);
+            I2C_SetAckBit(handle->base, true);
         /* dummy read to clock in 1st byte */
-        I2C_ReadByte(BOARD_I2C_BASEADDR);
+        I2C_ReadByte(handle->base);
     }
 
     /* Enable I2C interrupt, subsequent data transfer will be handled in ISR. */
-    I2C_SetIntCmd(BOARD_I2C_BASEADDR, true);
+    I2C_SetIntCmd(handle->base, true);
 
     /* Wait until receive data finish. */
-    xSemaphoreTake(i2cState.xSemaphore, portMAX_DELAY);
+    xSemaphoreTake(handle->xSemaphore, portMAX_DELAY);
+
+    /* Wait bus idle */
+    tickOld = xTaskGetTickCount();
+
+    while (I2C_GetStatusFlag(handle->base, i2cStatusBusBusy))
+    {
+        tickNew = xTaskGetTickCount();
+
+        /* A 50ms time-out to wait bus idle */
+        if ((50 * portTICK_PERIOD_MS) < (tickNew - tickOld))
+            return false;
+    }
 
     return true;
 }
 
-uint32_t I2C_XFER_GetReceiveStatus(void)
+uint32_t I2C_XFER_GetReceiveStatus(i2c_handle_t *handle)
 {
-    return i2cState.rxSize;
+    return handle->rxSize;
 }
 
-void BOARD_I2C_HANDLER(void)
+void I2C_XFER_Handler(i2c_handle_t *handle)
 {
     BaseType_t xHigherPriorityTaskWoken = pdFALSE;
 
     /* Clear interrupt flag. */
-    I2C_ClearStatusFlag(BOARD_I2C_BASEADDR, i2cStatusInterrupt);
+    I2C_ClearStatusFlag(handle->base, i2cStatusInterrupt);
 
     /* Exit the ISR if no transfer is happening for this instance. */
-    if (!i2cState.isBusy)
+    if (!handle->isBusy)
         return;
 
-    if (i2cModeMaster == i2cState.currentMode)
+    if (i2cModeMaster == handle->currentMode)
     {
-        if (i2cDirectionTransmit == i2cState.currentDir)
+        if (i2cDirectionTransmit == handle->currentDir)
         {
-            if ((I2C_GetStatusFlag(BOARD_I2C_BASEADDR, i2cStatusReceivedAck)) ||
-                ((0 == i2cState.txSize) && (0 == i2cState.cmdSize)))
+            if ((I2C_GetStatusFlag(handle->base, i2cStatusReceivedAck)) ||
+                ((0 == handle->txSize) && (0 == handle->cmdSize)))
             {
-                if ((i2cDirectionTransmit == i2cState.operateDir) ||
-                    (I2C_GetStatusFlag(BOARD_I2C_BASEADDR, i2cStatusReceivedAck)))
+                if ((i2cDirectionTransmit == handle->operateDir) ||
+                    (I2C_GetStatusFlag(handle->base, i2cStatusReceivedAck)))
                 {
                     /* Switch to Slave mode and Generate a Stop Signal. */
-                    I2C_SetWorkMode(BOARD_I2C_BASEADDR, i2cModeSlave);
-                    i2cState.currentMode = i2cModeSlave;
+                    I2C_SetWorkMode(handle->base, i2cModeSlave);
+                    handle->currentMode = i2cModeSlave;
 
                     /* Switch back to Rx direction. */
-                    I2C_SetDirMode(BOARD_I2C_BASEADDR, i2cDirectionReceive);
-                    i2cState.currentDir = i2cDirectionReceive;
+                    I2C_SetDirMode(handle->base, i2cDirectionReceive);
+                    handle->currentDir = i2cDirectionReceive;
 
                     /* Close I2C interrupt. */
-                    I2C_SetIntCmd(BOARD_I2C_BASEADDR, false);
+                    I2C_SetIntCmd(handle->base, false);
                     /* Release I2C Bus. */
-                    i2cState.isBusy = false;
-                    xSemaphoreGiveFromISR(i2cState.xSemaphore, &xHigherPriorityTaskWoken);
+                    handle->isBusy = false;
+                    xSemaphoreGiveFromISR(handle->xSemaphore, &xHigherPriorityTaskWoken);
+                    /* Perform a context switch to wake the higher priority task. */
+                    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
                 }
                 else
                 {
                     /* Switch back to Rx direction. */
-                    I2C_SetDirMode(BOARD_I2C_BASEADDR, i2cDirectionReceive);
-                    i2cState.currentDir = i2cDirectionReceive;
+                    I2C_SetDirMode(handle->base, i2cDirectionReceive);
+                    handle->currentDir = i2cDirectionReceive;
 
-                    if (1 == i2cState.rxSize)
+                    if (1 == handle->rxSize)
                         /* Send Nack */
-                        I2C_SetAckBit(BOARD_I2C_BASEADDR, false);
+                        I2C_SetAckBit(handle->base, false);
                     else
                         /* Send Ack */
-                        I2C_SetAckBit(BOARD_I2C_BASEADDR, true);
+                        I2C_SetAckBit(handle->base, true);
                     /* dummy read to clock in 1st byte */
-                    *i2cState.rxBuff = I2C_ReadByte(BOARD_I2C_BASEADDR);
+                    *handle->rxBuff = I2C_ReadByte(handle->base);
                 }
             }
             else
             {
-                if (0 != i2cState.cmdSize)
+                if (0 != handle->cmdSize)
                 {
-                    if ((1 == i2cState.cmdSize) && (i2cDirectionReceive == i2cState.operateDir))
-                        I2C_SendRepeatStart(BOARD_I2C_BASEADDR);
-                    I2C_WriteByte(BOARD_I2C_BASEADDR, *i2cState.cmdBuff);
-                    i2cState.cmdBuff++;
-                    i2cState.cmdSize--;
+                    if ((1 == handle->cmdSize) && (i2cDirectionReceive == handle->operateDir))
+                        I2C_SendRepeatStart(handle->base);
+                    I2C_WriteByte(handle->base, *handle->cmdBuff);
+                    handle->cmdBuff++;
+                    handle->cmdSize--;
                 }
                 else
                 {
-                    I2C_WriteByte(BOARD_I2C_BASEADDR, *i2cState.txBuff);
-                    i2cState.txBuff++;
-                    i2cState.txSize--;
+                    I2C_WriteByte(handle->base, *handle->txBuff);
+                    handle->txBuff++;
+                    handle->txSize--;
                 }
             }
         }
         else
         {
             /* Normal read operation. */
-            if (2 == i2cState.rxSize)
+            if (2 == handle->rxSize)
                 /* Send Nack */
-                I2C_SetAckBit(BOARD_I2C_BASEADDR, false);
+                I2C_SetAckBit(handle->base, false);
             else
                 /* Send Nack */
-                I2C_SetAckBit(BOARD_I2C_BASEADDR, true);
+                I2C_SetAckBit(handle->base, true);
 
-            if (1 == i2cState.rxSize)
+            if (1 == handle->rxSize)
             {
                 /* Switch back to Tx direction to avoid additional I2C bus read. */
-                I2C_SetDirMode(BOARD_I2C_BASEADDR, i2cDirectionTransmit);
-                i2cState.currentDir = i2cDirectionTransmit;
+                I2C_SetDirMode(handle->base, i2cDirectionTransmit);
+                handle->currentDir = i2cDirectionTransmit;
             }
-            *i2cState.rxBuff = I2C_ReadByte(BOARD_I2C_BASEADDR);
-            i2cState.rxBuff++;
-            i2cState.rxSize--;
+            *handle->rxBuff = I2C_ReadByte(handle->base);
+            handle->rxBuff++;
+            handle->rxSize--;
 
             /* receive finished. */
-            if (0 == i2cState.rxSize)
+            if (0 == handle->rxSize)
             {
                 /* Switch to Slave mode and Generate a Stop Signal. */
-                I2C_SetWorkMode(BOARD_I2C_BASEADDR, i2cModeSlave);
-                i2cState.currentMode = i2cModeSlave;
+                I2C_SetWorkMode(handle->base, i2cModeSlave);
+                handle->currentMode = i2cModeSlave;
 
                 /* Switch back to Rx direction. */
-                I2C_SetDirMode(BOARD_I2C_BASEADDR, i2cDirectionReceive);
-                i2cState.currentDir = i2cDirectionReceive;
+                I2C_SetDirMode(handle->base, i2cDirectionReceive);
+                handle->currentDir = i2cDirectionReceive;
 
                 /* Close I2C interrupt. */
-                I2C_SetIntCmd(BOARD_I2C_BASEADDR, false);
+                I2C_SetIntCmd(handle->base, false);
                 /* Release I2C Bus. */
-                i2cState.isBusy = false;
+                handle->isBusy = false;
                 /* Release I2C Sem4 */
-                xSemaphoreGiveFromISR(i2cState.xSemaphore, &xHigherPriorityTaskWoken);
+                xSemaphoreGiveFromISR(handle->xSemaphore, &xHigherPriorityTaskWoken);
+                /* Perform a context switch to wake the higher priority task. */
+                portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
             }
         }
     }

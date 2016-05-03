@@ -29,7 +29,7 @@
  */
 
 #include "board.h"
-#include "pin_mux.h"
+#include "gpio_pins.h"
 
 void hardware_init(void)
 {
@@ -42,7 +42,15 @@ void hardware_init(void)
     /* initialize debug uart */
     dbg_uart_init();
 
-     /* In this example, we need to grasp board I2C exclusively */
+    /* In this demo, we need to access RDC SEMAPHORE1 on this board */
+    RDC_SetPdapAccess(RDC, rdcPdapSemaphore1, 0xFF, false, false);
+
+    /* In this demo, we need to share board GPIO, we can set sreq argument to true
+     * when the peer core could also access GPIO with RDC_SEMAPHORE, or the peer
+     * core doesn't access the GPIO at all */
+    RDC_SetPdapAccess(RDC, BOARD_GPIO_SENSOR_RDC_PDAP, 0xFF, false/*true*/, false);
+
+    /* In this example, we need to grasp board I2C exclusively */
     RDC_SetPdapAccess(RDC, BOARD_I2C_RDC_PDAP, 3 << (BOARD_DOMAIN_ID * 2), false, false);
 
     /* Select I2C clock derived from OSC clock(24M) */
@@ -53,6 +61,15 @@ void hardware_init(void)
 
     /* I2C Pin setting */
     configure_i2c_pins(BOARD_I2C_BASEADDR);
+
+    /* Enable RDC SEMAPHORE GATE needed in this demo */
+    CCM_ControlGate(CCM, ccmCcgrGateSema1, ccmClockNeededRunWait);
+
+    /* Enable gpio clock gate */
+    CCM_ControlGate(CCM, BOARD_GPIO_SENSOR_CCM_CCGR, ccmClockNeededRunWait);
+
+    /* Configure gpio pin IOMUX */
+    configure_gpio_pin(BOARD_GPIO_SENSOR_CONFIG);
 }
 
 /*******************************************************************************

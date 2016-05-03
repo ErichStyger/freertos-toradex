@@ -54,7 +54,7 @@ static ecspi_state_t ecspiState;
 * Comments: ECSPI module initialize
 * 
 ******************************************************************************/
-void ECSPI_XFER_Config(ecspi_init_t* initConfig)
+void ECSPI_XFER_Config(const ecspi_init_config_t* initConfig)
 {
     /* Initialize ECSPI state structure content. */
     ecspiState.txBuffPtr = 0;
@@ -215,11 +215,11 @@ void BOARD_ECSPI_HANDLER(void)
     ECSPI_ClearStatusFlag(BOARD_ECSPI_BASEADDR, ecspiFlagTxfifoTc);
     ECSPI_ClearStatusFlag(BOARD_ECSPI_BASEADDR, ecspiFlagRxfifoOverflow);
 
+    /* Unlock the task to process the event. */
     xSemaphoreGiveFromISR(ecspiState.xSemaphore, &xHigherPriorityTaskWoken);
-    if(xHigherPriorityTaskWoken == pdTRUE)
-    {
-        portEND_SWITCHING_ISR(xHigherPriorityTaskWoken);
-    }
+
+    /* Perform a context switch to wake the higher priority task. */
+    portYIELD_FROM_ISR(xHigherPriorityTaskWoken);
 }
 
 /*******************************************************************************

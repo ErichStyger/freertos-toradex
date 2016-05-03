@@ -41,18 +41,18 @@
 
 typedef struct EcspiState
 {
-    uint8_t*                  txBuffPtr;    /* Pointer to ECSPI Transmission Buffer */
+    uint8_t*                  txBuffPtr;    /* Pointer to ECSPI Transmit Buffer */
     uint8_t                   txSize;       /* The remaining number of bytes to be transmitted */
     uint8_t*                  rxBuffPtr;    /* Pointer to ECSPI Receive Buffer */
-    uint8_t                   rxSize;       /* The remaining number of bytes to be transmitted */
-    volatile bool             isBusy;       /* True if there is a acctive transfer */
+    uint8_t                   rxSize;       /* The remaining number of bytes to be received */
+    volatile bool             isBusy;       /* True if there is a active transfer */
 } ecspi_state_t;
 
 /* ECSPI runtime state structure */
 static ecspi_state_t ecspiState;
 
 /* ECSPI master configure */
-static void ECSPI_MasterConfig(ecspi_init_t* initConfig);
+static void ECSPI_MasterConfig(ecspi_init_config_t* initConfig);
 /* ECSPI data transfer */
 static bool ECSPI_MasterTransfer(uint8_t* txBuffer, uint8_t* rxBuffer, uint32_t transferSize);
 static bool ECSPI_MasterReceiveBurst(void);
@@ -60,7 +60,7 @@ static bool ECSPI_MasterTransmitBurst(void);
 /* ECSPI transfer status */
 static bool ECSPI_MasterGetTransferStatus(void);
 
-/* Transfered data */
+/* Transferred data */
 static uint8_t txData[1] = {0};
 static uint8_t rxData[1] = {0};
 
@@ -69,7 +69,7 @@ int main(void)
     uint8_t control_char;
     uint8_t i;
 
-    ecspi_init_t ecspiMasterInitConfig = {
+    ecspi_init_config_t ecspiMasterInitConfig = {
         .baudRate = 500000,
         .mode = ecspiMasterMode,
         .burstLength = ECSPI_MASTER_BURSTLENGTH,
@@ -79,7 +79,7 @@ int main(void)
         .ecspiAutoStart = ECSPI_MASTER_STARTMODE
     };
 
-    /* Hardware initialiize, include RDC, CLOCK, IOMUX, ENABLE MODULE */
+    /* Hardware initialize, include RDC, CLOCK, IOMUX, ENABLE MODULE */
     hardware_init();
 
     /* Update clock frequency of this module */
@@ -117,7 +117,7 @@ int main(void)
 *
 * Function Name: ECSPI_MasterTransmitBurst
 * Comments: Fill the TXFIFO.
-* 
+*
 ******************************************************************************/
 static bool ECSPI_MasterTransmitBurst(void)
 {
@@ -128,7 +128,7 @@ static bool ECSPI_MasterTransmitBurst(void)
     /* Fill the TXFIFO */
     while((ecspiState.txSize > 0) && (ECSPI_GetStatusFlag(BOARD_ECSPI_MASTER_BASEADDR, ecspiFlagTxfifoFull) == 0))
     {
-        bytes = ecspiState.txSize & 0x3;      /* first get unaligned part trasmitted */
+        bytes = ecspiState.txSize & 0x3;      /* first get unaligned part transmitted */
         bytes = bytes ? bytes : 4;             /* if aligned, then must be 4 */
 
         if(!(ecspiState.txBuffPtr))
@@ -157,7 +157,7 @@ static bool ECSPI_MasterTransmitBurst(void)
 *
 * Function Name: ECSPI_MasterReceiveBurst
 * Comments: Receive data from RXFIFO
-* 
+*
 ******************************************************************************/
 static bool ECSPI_MasterReceiveBurst(void)
 {
@@ -190,12 +190,12 @@ static bool ECSPI_MasterReceiveBurst(void)
 * Function Name: ECSPI_MasterTransfer
 * Comments: Transmit and Receive an amount of data in no-blocking mode with
 *           interrupt.
-* 
+*
 ******************************************************************************/
 static bool ECSPI_MasterTransfer(uint8_t* txBuffer, uint8_t* rxBuffer, uint32_t transferSize)
 {
     uint32_t len;
-  
+
     if((ecspiState.isBusy) || (transferSize == 0))
     {
         return false;
@@ -222,7 +222,7 @@ static bool ECSPI_MasterTransfer(uint8_t* txBuffer, uint8_t* rxBuffer, uint32_t 
 *
 * Function Name: ECSPI_MasterGetTransferStatus
 * Comments: Get transfer status.
-* 
+*
 ******************************************************************************/
 static bool ECSPI_MasterGetTransferStatus(void)
 {
@@ -233,9 +233,9 @@ static bool ECSPI_MasterGetTransferStatus(void)
 *
 * Function Name: ECSPI_MasterConfig
 * Comments: ECSPI module initialize
-* 
+*
 ******************************************************************************/
-static void ECSPI_MasterConfig(ecspi_init_t* initConfig)
+static void ECSPI_MasterConfig(ecspi_init_config_t* initConfig)
 {
     /* Initialize ECSPI transfer state. */
     ecspiState.isBusy = false;
@@ -251,7 +251,7 @@ static void ECSPI_MasterConfig(ecspi_init_t* initConfig)
 *
 * Function Name: BOARD_ECSPI_MASTER_HANDLER
 * Comments: The interrupt service routine triggered by ECSPI interrupt
-* 
+*
 ******************************************************************************/
 void BOARD_ECSPI_MASTER_HANDLER(void)
 {
@@ -264,14 +264,14 @@ void BOARD_ECSPI_MASTER_HANDLER(void)
         ECSPI_MasterTransmitBurst();
         return;
     }
-  
+
     /* No data left to push, but still waiting for rx data, enable receive data available interrupt. */
     if(ecspiState.rxSize)
     {
         ECSPI_SetIntCmd(BOARD_ECSPI_MASTER_BASEADDR, ecspiFlagRxfifoReady, true);
         return;
     }
-  
+
     /* Disable interrupt */
     ECSPI_SetIntCmd(BOARD_ECSPI_MASTER_BASEADDR, ecspiFlagTxfifoEmpty, false);
     ECSPI_SetIntCmd(BOARD_ECSPI_MASTER_BASEADDR, ecspiFlagRxfifoReady, false);

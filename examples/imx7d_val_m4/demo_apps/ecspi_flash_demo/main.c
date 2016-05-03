@@ -97,7 +97,7 @@ int main(void)
     hardware_init();
 
     /* Ecspi module initialize, include configure parameters */
-    ecspi_init_t ecspiInitConfig = {
+    ecspi_init_config_t ecspiInitConfig = {
         .clockRate = get_ecspi_clock_freq(BOARD_ECSPI_BASEADDR),
         .baudRate = 500000,
         .mode = ecspiMasterMode,

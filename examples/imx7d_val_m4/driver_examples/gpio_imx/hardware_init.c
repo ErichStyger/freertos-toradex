@@ -45,8 +45,8 @@ void hardware_init(void)
     /* BOARD_GPIO_LED_RDC_PDAP is same as BOARD_GPIO_KEY_RDC_PDAP, so bypass
      * BOARD_GPIO_KEY_RDC_PDAP setting */
 
-    /* Enable gpio clock gate */
-    CCM_ControlGate(CCM, BOARD_GPIO_CCM_CCGR, ccmClockNeededRunWait);
+    /* Enable gpio clock gate, led and key share same CCGR on this board */
+    CCM_ControlGate(CCM, BOARD_GPIO_KEY_CCM_CCGR, ccmClockNeededRunWait);
     /* Configure gpio pin IOMUX */
     configure_gpio_pin(BOARD_GPIO_LED_CONFIG);
     configure_gpio_pin(BOARD_GPIO_KEY_CONFIG);
