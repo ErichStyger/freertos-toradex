@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
+ * Copyright (c) 2016, Toradex AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -27,51 +28,38 @@
  * (INCLUDING NEGLIGENCE OR OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
+#include <stdbool.h>
+#include "VF6XX_M4.h"
 
-/*
-** ###################################################################
-**     Abstract:
-**         Common include file for CMSIS register access layer headers.
-**
-**     http:                 www.freescale.com
-**     mail:                 support@freescale.com
-**
-** ###################################################################
-*/
+/* ----------------------------------------------------------------------------
+   -- Vector Table offset
+   ---------------------------------------------------------------------------- */
+#define VECT_TAB_OFFSET  0x0
 
-#ifndef __DEVICE_IMX_H__
-#define __DEVICE_IMX_H__
-
-/*
- * Include the cpu specific register header files.
- *
- * The CPU macro should be declared in the project or makefile.
- */
-#if defined(CPU_IMX6SX_M4)
-
-    /* CMSIS-style register definitions */
-    #include "MCIMX6X/include/MCIMX6SX_M4.h"
-
-#elif defined(CPU_IMX7D_M4)
-
-    /* CMSIS-style register definitions */
-    #include "MCIMX7D/include/MCIMX7D_M4.h"
-
-    #define RDC_SEMAPHORE_MASTER_SELF   (6)
-    #define SEMA4_PROCESSOR_SELF        (1)
-
-#elif defined(CPU_VF6XX_M4)
-
-    /* CMSIS-style register definitions */
-    #include "VF6XX/include/VF6XX_M4.h"
-
-    #define SEMA4_PROCESSOR_SELF	(1)
-
+/* ----------------------------------------------------------------------------
+   -- SystemInit()
+   ---------------------------------------------------------------------------- */
+void SystemInit(void)
+{
+    /* The Vector table base address is given by linker script. */
+#if defined(__CC_ARM)
+    extern uint32_t Image$$ER_pc_ram$$Base[];
 #else
-    #error "No valid CPU defined!"
+    extern uint32_t __VECTOR_TABLE[];
 #endif
 
-#endif /* __DEVICE_IMX_H__ */
+
+#if ((1 == __FPU_PRESENT) && (1 == __FPU_USED))
+    SCB->CPACR |= ((3UL << 10*2)|(3UL << 11*2));  /* set CP10 and CP11 Full Access */
+#endif
+
+    /* relocate vector table */
+#if defined(__CC_ARM)
+    SCB->VTOR = (uint32_t)Image$$ER_pc_ram$$Base + VECT_TAB_OFFSET;
+#else
+    SCB->VTOR = (uint32_t)__VECTOR_TABLE + VECT_TAB_OFFSET;
+#endif
+}
 
 /*******************************************************************************
  * EOF

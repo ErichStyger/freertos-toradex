@@ -1,5 +1,6 @@
 /*
  * Copyright (c) 2015, Freescale Semiconductor, Inc.
+ * Copyright (c) 2016, Toradex AG
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -28,51 +29,24 @@
  * SOFTWARE, EVEN IF ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
  */
 
-/*
-** ###################################################################
-**     Abstract:
-**         Common include file for CMSIS register access layer headers.
-**
-**     http:                 www.freescale.com
-**     mail:                 support@freescale.com
-**
-** ###################################################################
-*/
+#ifndef __SYSTEM_VF6XX_M4_H
+#define __SYSTEM_VF6XX_M4_H
 
-#ifndef __DEVICE_IMX_H__
-#define __DEVICE_IMX_H__
-
-/*
- * Include the cpu specific register header files.
- *
- * The CPU macro should be declared in the project or makefile.
- */
-#if defined(CPU_IMX6SX_M4)
-
-    /* CMSIS-style register definitions */
-    #include "MCIMX6X/include/MCIMX6SX_M4.h"
-
-#elif defined(CPU_IMX7D_M4)
-
-    /* CMSIS-style register definitions */
-    #include "MCIMX7D/include/MCIMX7D_M4.h"
-
-    #define RDC_SEMAPHORE_MASTER_SELF   (6)
-    #define SEMA4_PROCESSOR_SELF        (1)
-
-#elif defined(CPU_VF6XX_M4)
-
-    /* CMSIS-style register definitions */
-    #include "VF6XX/include/VF6XX_M4.h"
-
-    #define SEMA4_PROCESSOR_SELF	(1)
-
-#else
-    #error "No valid CPU defined!"
+#ifdef __cplusplus
+ extern "C" {
 #endif
 
-#endif /* __DEVICE_IMX_H__ */
+/**
+ * @brief Setup the microcontroller system.
+ *
+ * Typically this function configures the oscillator (PLL) that is part of the
+ * microcontroller device. For systems with variable clock speed it also updates
+ * the variable SystemCoreClock. SystemInit is called from startup_device file.
+ */
+extern void SystemInit(void);
 
-/*******************************************************************************
- * EOF
- ******************************************************************************/
+#ifdef __cplusplus
+}
+#endif
+
+#endif /* __SYSTEM_VF6XX_M4_H */
