@@ -31,6 +31,9 @@
 /* This is a template file for pins configuration created by New Kinetis SDK 2.x Project Wizard. Enjoy! */
 
 #include "fsl_device_registers.h"
+#include "fsl_common.h"
+#include "fsl_port.h"
+#include "fsl_gpio.h"
 
 /*******************************************************************************
  * Code
@@ -40,5 +43,54 @@
  */
 void BOARD_InitPins(void)
 {
-  /* This is a template function for pins configuration. Intentionally empty */
+	 gpio_pin_config_t gpio_out_config = {
+	        kGPIO_DigitalOutput, 0,
+	    };
+
+		CLOCK_EnableClock(kCLOCK_PortA);
+		CLOCK_EnableClock(kCLOCK_PortB);
+	    CLOCK_EnableClock(kCLOCK_PortC);
+	    CLOCK_EnableClock(kCLOCK_PortD);
+	    CLOCK_EnableClock(kCLOCK_PortE);
+
+	    /* Osc pins */
+	    PORT_SetPinMux(PORTA, 18UL, kPORT_PinDisabledOrAnalog);
+	    PORT_SetPinMux(PORTA, 19UL, kPORT_PinDisabledOrAnalog);
+
+	    /* CAN0 pinmux config */
+		PORT_SetPinMux(PORTA, 12u, kPORT_MuxAlt2); /* CAN0 TX */
+		PORT_SetPinMux(PORTA, 13u, kPORT_MuxAlt2); /* CAN0 RX */
+
+	    /* CAN1 pinmux config */
+		PORT_SetPinMux(PORTC, 17u, kPORT_MuxAlt2); /* CAN1 TX */
+		PORT_SetPinMux(PORTC, 16u, kPORT_MuxAlt2); /* CAN1 RX */
+
+		/* Debug UART3 pinmux config */
+		PORT_SetPinMux(PORTB, 11u, kPORT_MuxAlt3); /* UART3 TX */
+		PORT_SetPinMux(PORTB, 10u, kPORT_MuxAlt3); /* UART3 RX */
+
+		/* Resistive Touch panel pinmux config */
+		PORT_SetPinMux(PORTE, 6u, kPORT_MuxAsGpio);
+		GPIO_PinInit(GPIOE, 6u, &gpio_out_config);
+		GPIO_SetPinsOutput(GPIOE, 1u << 6);	/* Force X+*/
+		PORT_SetPinMux(PORTB, 9u, kPORT_MuxAsGpio);
+		GPIO_PinInit(GPIOB, 9u, &gpio_out_config);
+		GPIO_ClearPinsOutput(GPIOB, 1u << 9); /* Force X-*/
+		PORT_SetPinMux(PORTC, 5u, kPORT_MuxAsGpio);
+		GPIO_PinInit(GPIOC, 5u, &gpio_out_config);
+		GPIO_SetPinsOutput(GPIOC, 1u << 5); /* Force Y+*/
+		PORT_SetPinMux(PORTC, 13u, kPORT_MuxAsGpio);
+		GPIO_PinInit(GPIOC, 13u, &gpio_out_config);
+		GPIO_ClearPinsOutput(GPIOC, 1u << 13); /* Force Y-*/
+		PORT_SetPinMux(PORTB, 6UL, kPORT_PinDisabledOrAnalog); /* Sense X+ */
+		PORT_SetPinMux(PORTB, 7UL, kPORT_PinDisabledOrAnalog); /* Sense X- */
+		PORT_SetPinMux(PORTC, 8UL, kPORT_PinDisabledOrAnalog); /* Sense Y+ */
+		PORT_SetPinMux(PORTC, 9UL, kPORT_PinDisabledOrAnalog); /* Sense Y- */
+
+		/* SPI2 pinmux config */
+		PORT_SetPinMux(PORTB, 21u, kPORT_MuxAlt2); /* SPI2_SCK */
+		PORT_SetPinMux(PORTB, 22u, kPORT_MuxAlt2); /* SPI2_SOUT */
+		PORT_SetPinMux(PORTB, 23u, kPORT_MuxAlt2); /* SPI2_SIN */
+		PORT_SetPinMux(PORTB, 20u, kPORT_MuxAsGpio); /* SPI2_SS */
+
 }
