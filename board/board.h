@@ -40,6 +40,17 @@
 /* The board name */
 #define BOARD_NAME "###-not-specified-###"
 
+#define BOARD_USE_UART
+#define BOARD_DEBUG_UART_TYPE DEBUG_CONSOLE_DEVICE_TYPE_UART
+#define BOARD_DEBUG_UART_BASEADDR (uint32_t) UART3
+#define BOARD_DEBUG_UART_CLKSRC kCLOCK_BusClk
+#define BOARD_DEBUG_UART_CLK_FREQ CLOCK_GetBusClkFreq()
+#define BOARD_UART_IRQ UART3_RX_TX_IRQn
+#define BOARD_UART_IRQ_HANDLER UART3_RX_TX_IRQHandler
+
+#ifndef BOARD_DEBUG_UART_BAUDRATE
+#define BOARD_DEBUG_UART_BAUDRATE 115200
+#endif
 
 /*******************************************************************************
  * API
