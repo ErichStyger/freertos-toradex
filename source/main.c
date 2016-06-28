@@ -37,7 +37,7 @@
 #include "board.h"
 #include "pin_mux.h"
 #include "clock_config.h"
-/*#include "fsl_debug_console.h"*/
+#include "fsl_debug_console.h"
 
 /* FreeRTOS kernel includes. */
 #include "FreeRTOS.h"
@@ -68,9 +68,8 @@ int main(void) {
   BOARD_InitPins();
   BOARD_BootClockRUN();
   BOARD_InitDebugConsole();
-
   /* Add your code here */
-
+  PRINTF("Hello!\r\n");
   /* Create RTOS task */
   xTaskCreate(hello_task, "Hello_task", configMINIMAL_STACK_SIZE, NULL, hello_task_PRIORITY, NULL);
   vTaskStartScheduler();
