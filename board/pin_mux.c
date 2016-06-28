@@ -46,6 +46,11 @@ void BOARD_InitPins(void)
 	 gpio_pin_config_t gpio_out_config = {
 	        kGPIO_DigitalOutput, 0,
 	    };
+	 gpio_pin_config_t gpio_out_hi_config = {
+	        kGPIO_DigitalOutput, 1,
+	    };
+
+	 port_pin_config_t od_config;
 
 		CLOCK_EnableClock(kCLOCK_PortA);
 		CLOCK_EnableClock(kCLOCK_PortB);
@@ -71,17 +76,13 @@ void BOARD_InitPins(void)
 
 		/* Resistive Touch panel pinmux config */
 		PORT_SetPinMux(PORTE, 6u, kPORT_MuxAsGpio);
-		GPIO_PinInit(GPIOE, 6u, &gpio_out_config);
-		GPIO_SetPinsOutput(GPIOE, 1u << 6);	/* Force X+*/
+		GPIO_PinInit(GPIOE, 6u, &gpio_out_hi_config); /* Force X+*/
 		PORT_SetPinMux(PORTB, 9u, kPORT_MuxAsGpio);
-		GPIO_PinInit(GPIOB, 9u, &gpio_out_config);
-		GPIO_ClearPinsOutput(GPIOB, 1u << 9); /* Force X-*/
+		GPIO_PinInit(GPIOB, 9u, &gpio_out_config); /* Force X-*/
 		PORT_SetPinMux(PORTC, 5u, kPORT_MuxAsGpio);
-		GPIO_PinInit(GPIOC, 5u, &gpio_out_config);
-		GPIO_SetPinsOutput(GPIOC, 1u << 5); /* Force Y+*/
+		GPIO_PinInit(GPIOC, 5u, &gpio_out_hi_config); /* Force Y+*/
 		PORT_SetPinMux(PORTC, 13u, kPORT_MuxAsGpio);
-		GPIO_PinInit(GPIOC, 13u, &gpio_out_config);
-		GPIO_ClearPinsOutput(GPIOC, 1u << 13); /* Force Y-*/
+		GPIO_PinInit(GPIOC, 13u, &gpio_out_config); /* Force Y-*/
 		PORT_SetPinMux(PORTB, 6UL, kPORT_PinDisabledOrAnalog); /* Sense X+ */
 		PORT_SetPinMux(PORTB, 7UL, kPORT_PinDisabledOrAnalog); /* Sense X- */
 		PORT_SetPinMux(PORTC, 8UL, kPORT_PinDisabledOrAnalog); /* Sense Y+ */
@@ -92,5 +93,22 @@ void BOARD_InitPins(void)
 		PORT_SetPinMux(PORTB, 22u, kPORT_MuxAlt2); /* SPI2_SOUT */
 		PORT_SetPinMux(PORTB, 23u, kPORT_MuxAlt2); /* SPI2_SIN */
 		PORT_SetPinMux(PORTB, 20u, kPORT_MuxAsGpio); /* SPI2_SS */
+
+		/* Open Drain INT pins config */
+		od_config.mux = kPORT_MuxAsGpio;
+		od_config.openDrainEnable = kPORT_OpenDrainEnable;
+		od_config.pullSelect = kPORT_PullDisable;
+		od_config.slewRate = kPORT_FastSlewRate;
+		od_config.passiveFilterEnable = kPORT_PassiveFilterDisable;
+		od_config.driveStrength = kPORT_LowDriveStrength;
+		od_config.lockRegister = kPORT_UnlockRegister;
+		GPIO_PinInit(GPIOA, 16u, &gpio_out_config);
+		PORT_SetPinConfig(PORTA, 16u, &od_config); /* MCU_INT1 */
+		GPIO_PinInit(GPIOA, 29u, &gpio_out_hi_config);
+		PORT_SetPinConfig(PORTA, 29u, &od_config); /* MCU_INT2 */
+		GPIO_PinInit(GPIOB, 8u, &gpio_out_config);
+		PORT_SetPinConfig(PORTB, 8u, &od_config); /* MCU_INT3 */
+		GPIO_PinInit(GPIOE, 26u, &gpio_out_config);
+		PORT_SetPinConfig(PORTE, 26u, &od_config); /* MCU_INT4 */
 
 }
