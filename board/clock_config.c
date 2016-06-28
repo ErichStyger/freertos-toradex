@@ -30,6 +30,10 @@
 
 /* This is a template for clock configuration created by New Kinetis SDK 2.x Project Wizard. Enjoy! */
 
+#include "fsl_device_registers.h"
+#include "fsl_common.h"
+#include "fsl_clock.h"
+#include "clock_config.h"
 
 /*******************************************************************************
  * Definitions
@@ -43,10 +47,51 @@
  * Code
  ******************************************************************************/
 
-/*!
- * @brief configure clock after reset for this demo/example
- */
-void BOARD_BootClockRUN(void) {
-	/* The user configuration should be placed here */
+void BOARD_InitOsc0(void)
+{
+    const osc_config_t oscConfig = {.freq = BOARD_XTAL0_CLK_HZ,
+                                    .capLoad = 0,
+                                    .workMode = kOSC_ModeOscLowPower,
+                                    .oscerConfig = {
+                                        .enableMode = kOSC_ErClkEnable,
+#if (defined(FSL_FEATURE_OSC_HAS_EXT_REF_CLOCK_DIVIDER) && FSL_FEATURE_OSC_HAS_EXT_REF_CLOCK_DIVIDER)
+                                        .erclkDiv = 0U,
+#endif
+                                    }};
+
+    CLOCK_InitOsc0(&oscConfig);
+
+    /* Passing the XTAL0 frequency to clock driver. */
+    CLOCK_SetXtal0Freq(BOARD_XTAL0_CLK_HZ);
+    /* Use RTC_CLKIN input clock directly. */
+    //CLOCK_SetXtal32Freq(BOARD_XTAL32K_CLK_HZ);
 }
+
+void BOARD_BootClockRUN(void)
+{
+    /*
+    * Core clock: 96MHz
+    * Bus clock: 48MHz
+    */
+    mcg_pll_config_t pll0Config = {
+        .enableMode = 0U, .prdiv = 0x3U, .vdiv = 0x18U,
+    };
+    const sim_clock_config_t simConfig = {
+        .pllFllSel = 1U,        /* PLLFLLSEL select PLL. */
+        .er32kSrc = 2U,         /* ERCLK32K selection, use RTC. */
+        .clkdiv1 = 0x01130000U, /* SIM_CLKDIV1. */
+    };
+
+    CLOCK_SetSimSafeDivs();
+    BOARD_InitOsc0();
+
+    CLOCK_CalcPllDiv(BOARD_XTAL0_CLK_HZ, 96000000U, &pll0Config.prdiv, &pll0Config.vdiv);
+    CLOCK_BootToPeeMode(kMCG_OscselOsc, kMCG_PllClkSelPll0, &pll0Config);
+
+    CLOCK_SetInternalRefClkConfig(kMCG_IrclkEnable, kMCG_IrcSlow, 0);
+    CLOCK_SetSimConfig(&simConfig);
+
+    SystemCoreClock = 96000000U;
+}
+
 

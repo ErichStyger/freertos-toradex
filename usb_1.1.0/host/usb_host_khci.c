@@ -1433,7 +1433,7 @@ usb_status_t USB_HostKhciCreate(uint8_t controllerId,
 
     usbHostPointer->usbRegBase->CTL = USB_CTL_HOSTMODEEN_MASK;
     /* Wait for attach interrupt */
-    usbHostPointer->usbRegBase->INTEN |= (USB_INTEN_ATTACHEN_MASK | USB_INTEN_SOFTOKEN_MASK);
+    usbHostPointer->usbRegBase->INTEN |= (USB_INTEN_ATTACHEN_MASK);// | USB_INTEN_SOFTOKEN_MASK);
 #if defined(FSL_FEATURE_USB_KHCI_DYNAMIC_SOF_THRESHOLD_COMPARE_ENABLED) && \
     (FSL_FEATURE_USB_KHCI_DYNAMIC_SOF_THRESHOLD_COMPARE_ENABLED == 1U)
     usbHostPointer->usbRegBase->MISCCTRL |= USB_MISCCTRL_SOFDYNTHLD_MASK;
