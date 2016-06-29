@@ -69,6 +69,14 @@ TaskHandle_t can_task_handle;
 TaskHandle_t usb_task_handle;
 TaskHandle_t hello_task_handle;
 
+struct test_data {
+	uint16_t vid;
+	uint16_t pid;
+	uint8_t  enumerated;
+	uint8_t  can_test_status;
+	uint8_t  ts_test_status;
+} test_status;
+
 /*!
  * @brief Task responsible for printing of "Hello world." message.
  */
@@ -101,11 +109,13 @@ static usb_status_t USB_HostEvent(usb_device_handle deviceHandle,
 
 	case kUSB_HostEventEnumerationDone:
 		usb_echo("device enumerated.\r\n");
+		test_status.enumerated = 1;
 		USB_HostHelperGetPeripheralInformation(deviceHandle, kUSB_HostGetDevicePID, &infoValue);
 		usb_echo("PID = 0x%x ", infoValue);
+		test_status.pid = infoValue;
 		USB_HostHelperGetPeripheralInformation(deviceHandle, kUSB_HostGetDeviceVID, &infoValue);
 		usb_echo("VID = 0x%x \r\n", infoValue);
-		vTaskResume(can_task_handle);
+		test_status.vid = infoValue;
 		break;
 
 	case kUSB_HostEventDetach:
@@ -359,12 +369,14 @@ static void can_test_task(void *pvParameters) {
 	if (xSemaphoreTake(cb_msg[1].sem, 1000u) == pdFALSE)
 	{
 		PRINTF("FAIL!\r\n");
-		FLEXCAN_TransferAbortSend(CAN0, &flexcanHandle[0], &txXfer);
-		FLEXCAN_TransferAbortReceive(CAN1, &flexcanHandle[1], &rxXfer);
+		FLEXCAN_TransferAbortSend(CAN0, &flexcanHandle[0], txXfer.mbIdx);
+		FLEXCAN_TransferAbortReceive(CAN1, &flexcanHandle[1], rxXfer.mbIdx);
+		test_status.can_test_status = 0x0F;
 	}
 	else
 	{
 		PRINTF("SUCCESS!\r\n");
+		test_status.can_test_status = 0x05;
 	}
 
 	rxXfer.frame = &rxFrame;
@@ -388,12 +400,14 @@ static void can_test_task(void *pvParameters) {
 	if (xSemaphoreTake(cb_msg[0].sem, 1000u ) == pdFALSE)
 	{
 		PRINTF("FAIL!\r\n");
-		FLEXCAN_TransferAbortSend(CAN1, &flexcanHandle[0], &txXfer);
-		FLEXCAN_TransferAbortReceive(CAN0, &flexcanHandle[1], &rxXfer);
+		FLEXCAN_TransferAbortSend(CAN1, &flexcanHandle[0], txXfer.mbIdx);
+		FLEXCAN_TransferAbortReceive(CAN0, &flexcanHandle[1], rxXfer.mbIdx);
+		test_status.can_test_status |= 0xF0;
 	}
 	else
 	{
 		PRINTF("SUCCESS!\r\n");
+		test_status.can_test_status |= 0x50;
 	}
 
 	vSemaphoreDelete(cb_msg[0].sem);
