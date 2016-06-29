@@ -102,9 +102,9 @@ void BOARD_InitPins(void)
 		od_config.passiveFilterEnable = kPORT_PassiveFilterDisable;
 		od_config.driveStrength = kPORT_LowDriveStrength;
 		od_config.lockRegister = kPORT_UnlockRegister;
-		GPIO_PinInit(GPIOA, 16u, &gpio_out_config);
+		GPIO_PinInit(GPIOA, 16u, &gpio_out_hi_config);
 		PORT_SetPinConfig(PORTA, 16u, &od_config); /* MCU_INT1 */
-		GPIO_PinInit(GPIOA, 29u, &gpio_out_hi_config);
+		GPIO_PinInit(GPIOA, 29u, &gpio_out_config);
 		PORT_SetPinConfig(PORTA, 29u, &od_config); /* MCU_INT2 */
 		GPIO_PinInit(GPIOB, 8u, &gpio_out_config);
 		PORT_SetPinConfig(PORTB, 8u, &od_config); /* MCU_INT3 */
