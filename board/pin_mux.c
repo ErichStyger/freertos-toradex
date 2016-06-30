@@ -110,5 +110,7 @@ void BOARD_InitPins(void)
 		PORT_SetPinConfig(PORTB, 8u, &od_config); /* MCU_INT3 */
 		GPIO_PinInit(GPIOE, 26u, &gpio_out_config);
 		PORT_SetPinConfig(PORTE, 26u, &od_config); /* MCU_INT4 */
+		GPIO_PinInit(GPIOC, 19u, &gpio_out_hi_config);
+		PORT_SetPinConfig(PORTC, 19u, &od_config); /* PMIC_ONKEY */
 
 }
