@@ -40,6 +40,7 @@
 #include "fsl_debug_console.h"
 #include "fsl_mpu.h"
 #include "fsl_flexcan.h"
+#include "fsl_dspi.h"
 #include "usb_host_config.h"
 #include "usb.h"
 #include "usb_host.h"
@@ -67,6 +68,7 @@
 /* Task handles */
 TaskHandle_t can_task_handle;
 TaskHandle_t usb_task_handle;
+TaskHandle_t spi_task_handle;
 TaskHandle_t hello_task_handle;
 
 struct test_data {
@@ -416,6 +418,55 @@ static void can_test_task(void *pvParameters) {
 	vTaskDelete(NULL);
 }
 
+
+dspi_slave_handle_t spi_handle;
+
+void SPI_callback(SPI_Type *base, dspi_slave_handle_t *handle, status_t status, void *userData)
+{
+    if (status == kStatus_Success)
+    {
+        __NOP();
+    }
+
+    if (status == kStatus_DSPI_Error)
+    {
+        __NOP();
+    }
+
+    PRINTF("This is DSPI slave call back . \r\n");
+}
+
+void SPI_init() {
+	dspi_slave_config_t slaveConfig;
+	/* Slave config */
+	slaveConfig.whichCtar = kDSPI_Ctar0;
+	slaveConfig.ctarConfig.bitsPerFrame = 8;
+	slaveConfig.ctarConfig.cpol = kDSPI_ClockPolarityActiveHigh;
+	slaveConfig.ctarConfig.cpha = kDSPI_ClockPhaseFirstEdge;
+	slaveConfig.enableContinuousSCK = kDSPI_MsbFirst;
+	slaveConfig.enableRxFifoOverWrite = false;
+	slaveConfig.enableModifiedTimingFormat = false;
+	slaveConfig.samplePoint = kDSPI_SckToSin0Clock;
+
+	DSPI_SlaveInit(SPI2, &slaveConfig);
+	DSPI_TransferCreateHandle(SPI2, &spi_handle, SPI_callback, spi_handle.userData);
+
+	/* Set dspi slave interrupt priority higher. */
+	NVIC_SetPriority(SPI2_IRQn, 5U);
+
+}
+
+static void spi_task(void *pvParameters) {
+	callback_message_t cb_msg;
+
+	cb_msg.sem = xSemaphoreCreateBinary();
+	spi_handle.userData = &cb_msg;
+	SPI_init();
+	while(1){
+
+	}
+}
+
 /*!
  * @brief Application entry point.
  */
@@ -439,6 +490,10 @@ int main(void) {
 	if (xTaskCreate(USB_HostTask, "usb host task", 2000L / sizeof(portSTACK_TYPE), g_HostHandle, 4, &usb_task_handle) != pdPASS)
 	{
 		usb_echo("create host task error\r\n");
+	}
+	if(xTaskCreate(hello_task, "SPI_task", 2000L / sizeof(portSTACK_TYPE), NULL, 4, &spi_task_handle) != pdPASS)
+	{
+		usb_echo("create hello task error\r\n");
 	}
 	if(xTaskCreate(hello_task, "Hello_task", configMINIMAL_STACK_SIZE, NULL, hello_task_PRIORITY, &hello_task_handle) != pdPASS)
 	{
