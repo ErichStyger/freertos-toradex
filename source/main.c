@@ -41,6 +41,7 @@
 #include "fsl_mpu.h"
 #include "fsl_flexcan.h"
 #include "fsl_dspi.h"
+#include "fsl_gpio.h"
 #include "usb_host_config.h"
 #include "usb.h"
 #include "usb_host.h"
@@ -415,25 +416,30 @@ static void can_test_task(void *pvParameters) {
 	vSemaphoreDelete(cb_msg[0].sem);
 	vSemaphoreDelete(cb_msg[1].sem);
 
+	vTaskResume(spi_task_handle);
 	vTaskDelete(NULL);
 }
 
-
+#define TRANSFER_SIZE 32U
 dspi_slave_handle_t spi_handle;
+uint8_t slaveRxData[TRANSFER_SIZE] = {0U};
+uint8_t slaveTxData[TRANSFER_SIZE] = {0U};
 
 void SPI_callback(SPI_Type *base, dspi_slave_handle_t *handle, status_t status, void *userData)
 {
+	callback_message_t * cb = (callback_message_t*) userData;
+	BaseType_t reschedule = pdFALSE;
+
     if (status == kStatus_Success)
     {
-        __NOP();
+    	xSemaphoreGiveFromISR(cb->sem, &reschedule);
     }
 
     if (status == kStatus_DSPI_Error)
     {
         __NOP();
     }
-
-    PRINTF("This is DSPI slave call back . \r\n");
+    portYIELD_FROM_ISR(reschedule);
 }
 
 void SPI_init() {
@@ -449,21 +455,71 @@ void SPI_init() {
 	slaveConfig.samplePoint = kDSPI_SckToSin0Clock;
 
 	DSPI_SlaveInit(SPI2, &slaveConfig);
-	DSPI_TransferCreateHandle(SPI2, &spi_handle, SPI_callback, spi_handle.userData);
+	DSPI_SlaveTransferCreateHandle(SPI2, &spi_handle, SPI_callback, spi_handle.userData);
 
 	/* Set dspi slave interrupt priority higher. */
 	NVIC_SetPriority(SPI2_IRQn, 5U);
+	PRINTF("SPI init done \r\n");
 
 }
 
 static void spi_task(void *pvParameters) {
 	callback_message_t cb_msg;
+	dspi_transfer_t slaveXfer;
 
 	cb_msg.sem = xSemaphoreCreateBinary();
 	spi_handle.userData = &cb_msg;
 	SPI_init();
-	while(1){
+	GPIO_ClearPinsOutput(GPIOA, 1u << 29u); // INT2 active
 
+	while(1){
+	    slaveXfer.txData = slaveTxData;
+	    slaveXfer.rxData = slaveRxData;
+	    slaveXfer.dataSize = 16;
+	    slaveXfer.configFlags = kDSPI_SlaveCtar0;
+	    //Wait for instructions from SoC
+	    DSPI_SlaveTransferNonBlocking(SPI2, &spi_handle, &slaveXfer);
+	    PRINTF("Waiting for SPI transfer\r\n");
+	    xSemaphoreTake(cb_msg.sem, portMAX_DELAY);
+	    for (int i = 0; i< 16; i++)
+	    	PRINTF("Transfer received Rx[%d]= 0x%X\r\n", i, slaveRxData[i]);
+		switch (slaveRxData[0]){
+		case 0x01: //echo test echo remaining 15 characters
+			slaveTxData[0] = 42;
+			memcpy(&slaveTxData[1], &slaveRxData[1], 15);
+			break;
+		case 0x02: // forward USB state
+			slaveTxData[0] = 0x02;
+			slaveTxData[1] = test_status.enumerated;
+			slaveTxData[2] = test_status.vid & 0xFF;
+			slaveTxData[3] = (test_status.vid >> 8) & 0xFF;
+			slaveTxData[4] = test_status.pid & 0xFF;
+			slaveTxData[5] = (test_status.pid >> 8) & 0xFF;
+			memset(&slaveTxData[6], 0, 10);
+			break;
+		case 0x03: // execute CAN test;
+			vTaskResume(can_task_handle);
+			vTaskSuspend(NULL); // wait for can_test to finish
+			slaveTxData[0] = 0x03;
+			slaveTxData[1] = test_status.can_test_status;
+			memset(&slaveTxData[2], 0, 15);
+			break;
+		case 0x04: // execute touch screen test;
+//			vTaskResume(ts_task_handle);
+//			vTaskSuspend(NULL); // wait for ts_test to finish
+			slaveTxData[0] = 0x04;
+			slaveTxData[1] = 0x01;//test_status.ts_test_status;
+			memset(&slaveTxData[2], 0, 14);
+			break;
+		default:
+			memset(slaveTxData, 0x33, 16);
+			;
+		}
+		//Prepare out transfer and signal on the INT pin
+		DSPI_SlaveTransferNonBlocking(SPI2, &spi_handle, &slaveXfer);
+		GPIO_ClearPinsOutput(GPIOA, 1u << 16u); // INT1 active
+		xSemaphoreTake(cb_msg.sem, portMAX_DELAY);
+		GPIO_SetPinsOutput(GPIOA, 1u << 16u); // INT1 idle
 	}
 }
 
@@ -491,7 +547,7 @@ int main(void) {
 	{
 		usb_echo("create host task error\r\n");
 	}
-	if(xTaskCreate(hello_task, "SPI_task", 2000L / sizeof(portSTACK_TYPE), NULL, 4, &spi_task_handle) != pdPASS)
+	if(xTaskCreate(spi_task, "SPI_task", 2000L / sizeof(portSTACK_TYPE), NULL, 4, &spi_task_handle) != pdPASS)
 	{
 		usb_echo("create hello task error\r\n");
 	}

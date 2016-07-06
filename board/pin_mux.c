@@ -92,7 +92,7 @@ void BOARD_InitPins(void)
 		PORT_SetPinMux(PORTB, 21u, kPORT_MuxAlt2); /* SPI2_SCK */
 		PORT_SetPinMux(PORTB, 22u, kPORT_MuxAlt2); /* SPI2_SOUT */
 		PORT_SetPinMux(PORTB, 23u, kPORT_MuxAlt2); /* SPI2_SIN */
-		PORT_SetPinMux(PORTB, 20u, kPORT_MuxAsGpio); /* SPI2_SS */
+		PORT_SetPinMux(PORTB, 20u, kPORT_MuxAlt2); /* SPI2_SS */
 
 		/* Open Drain INT pins config */
 		od_config.mux = kPORT_MuxAsGpio;
@@ -104,7 +104,7 @@ void BOARD_InitPins(void)
 		od_config.lockRegister = kPORT_UnlockRegister;
 		GPIO_PinInit(GPIOA, 16u, &gpio_out_hi_config);
 		PORT_SetPinConfig(PORTA, 16u, &od_config); /* MCU_INT1 */
-		GPIO_PinInit(GPIOA, 29u, &gpio_out_config);
+		GPIO_PinInit(GPIOA, 29u, &gpio_out_hi_config);
 		PORT_SetPinConfig(PORTA, 29u, &od_config); /* MCU_INT2 */
 		GPIO_PinInit(GPIOB, 8u, &gpio_out_config);
 		PORT_SetPinConfig(PORTB, 8u, &od_config); /* MCU_INT3 */

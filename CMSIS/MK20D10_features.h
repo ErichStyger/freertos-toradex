@@ -127,7 +127,7 @@
     /* @brief DRY availability on the SoC. */
     #define FSL_FEATURE_SOC_DRY_COUNT (0)
     /* @brief DSPI availability on the SoC. */
-    #define FSL_FEATURE_SOC_DSPI_COUNT (2)
+    #define FSL_FEATURE_SOC_DSPI_COUNT (3)
     /* @brief EMVSIM availability on the SoC. */
     #define FSL_FEATURE_SOC_EMVSIM_COUNT (0)
     /* @brief ENC availability on the SoC. */
