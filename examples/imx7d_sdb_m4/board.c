@@ -80,7 +80,7 @@ void dbg_uart_init(void)
     /* Config debug uart pins */
     configure_uart_pins(BOARD_DEBUG_UART_BASEADDR);
 
-    DbgConsole_Init(BOARD_DEBUG_UART_BASEADDR, get_uart_clock_freq(BOARD_DEBUG_UART_BASEADDR), 115200, uartModemModeDce);
+    imx_DbgConsole_Init(BOARD_DEBUG_UART_BASEADDR, get_uart_clock_freq(BOARD_DEBUG_UART_BASEADDR), 115200, uartModemModeDce);
 }
 
 void BOARD_RdcInit(void)

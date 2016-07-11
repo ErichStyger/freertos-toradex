@@ -128,6 +128,8 @@ ADD_EXECUTABLE(blinking_imx_demo
     "${ProjDirPath}/../../../../../platform/drivers/src/ccm_imx7d.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/rdc.c"
     "${ProjDirPath}/../../../../../platform/drivers/src/wdog_imx.c"
+    "${ProjDirPath}/../../../../../platform/utilities/src/debug_console.c"
+    "${ProjDirPath}/../../../../../platform/utilities/inc/debug_console.h"
     "${ProjDirPath}/../../../../../platform/utilities/src/debug_console_imx.c"
     "${ProjDirPath}/../../../../../platform/utilities/inc/debug_console_imx.h"
     "${ProjDirPath}/../../../../../platform/utilities/src/print_scan.c"

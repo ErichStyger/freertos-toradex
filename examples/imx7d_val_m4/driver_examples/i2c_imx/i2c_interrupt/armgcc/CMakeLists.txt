@@ -80,6 +80,8 @@ ENDIF()
 # ADD_EXECUTABLE
 ADD_EXECUTABLE(i2c_imx_interrupt_example 
     "${ProjDirPath}/../../../../../../platform/devices/MCIMX7D/startup/gcc/startup_MCIMX7D_M4.S"
+    "${ProjDirPath}/../../../../../../platform/utilities/src/debug_console.c"
+    "${ProjDirPath}/../../../../../../platform/utilities/inc/debug_console.h"
     "${ProjDirPath}/../../../../../../platform/utilities/src/debug_console_imx.c"
     "${ProjDirPath}/../../../../../../platform/utilities/inc/debug_console_imx.h"
     "${ProjDirPath}/../../../../../../platform/utilities/src/print_scan.c"
