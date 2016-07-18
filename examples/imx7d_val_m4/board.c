@@ -35,7 +35,6 @@
 #include "rdc.h"
 #include "wdog_imx.h"
 #include "pin_mux.h"
-#include "uart_imx.h"
 
 /* Initialize clock. */
 void BOARD_ClockInit(void)

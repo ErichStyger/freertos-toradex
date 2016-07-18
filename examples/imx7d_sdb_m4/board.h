@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2015, Freescale Semiconductor, Inc.
+ * Copyright (c) 2015-2016, Freescale Semiconductor, Inc.
  * All rights reserved.
  *
  * Redistribution and use in source and binary forms, with or without modification,
@@ -127,6 +127,9 @@
 
 /* GPC information for this board*/
 #define BOARD_GPC_BASEADDR                    GPC
+
+/* SIM_WAKEUP CG information*/
+#define BOARD_SIM_WAKEUP_CCGR                 ccmCcgrGateSimWakeup
 
 #if defined(__cplusplus)
 extern "C" {
