@@ -115,9 +115,9 @@ void StrEchoTask(void *pvParameters)
 	* Take from next app string buffer
 	*/
 	if ((strlen(strVar[app_idx]) == 2) && (strVar[app_idx][0] == 0xd) && (strVar[app_idx][1] == 0xa))
-	    printf("Get New Line From A7 From Slot %d\r\n", app_idx);
+	    printf("Get New Line From A5 From Slot %d\r\n", app_idx);
 	else
-	    printf("Get Message From A7 : \"%s\" [len : %d] from slot %d\r\n", strVar[app_idx], strlen(strVar[app_idx]), app_idx);
+	    printf("Get Message From A5 : \"%s\" [len : %d] from slot %d\r\n", strVar[app_idx], strlen(strVar[app_idx]), app_idx);
 
 	/*
 	* echo back
