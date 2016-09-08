@@ -41,6 +41,12 @@
 #include <ccm_vf6xx.h>
 #include "debug_console_vf6xx.h"
 
+/*
+ * function decalaration for platform provided facility
+ */
+extern void platform_interrupt_enable(void);
+extern void platform_interrupt_disable(void);
+
 #define MAX_STRING_SIZE 496         /* Maximum size to hold the data A7 gives */
 
 /*

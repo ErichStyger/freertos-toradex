@@ -40,6 +40,12 @@
 #include "debug_console_vf6xx.h"
 
 /*
+ * function decalaration for platform provided facility
+ */
+extern void platform_interrupt_enable(void);
+extern void platform_interrupt_disable(void);
+
+/*
  * APP decided interrupt priority
  */
 #define APP_MSCM_IRQ_PRIORITY	3
