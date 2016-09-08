@@ -80,7 +80,7 @@ void PingPongTask(void *pvParameters)
     * rpmsg_channel_created will post the first semaphore
     */
     xSemaphoreTake(app_sema, portMAX_DELAY);
-    printf("Name service handshake is done, M4 has setup a rpmsg channel [%d ---> %d]\r\n", app_chnl->src, app_chnl->dst);
+    printf("Name service handshake is done, M4 has setup a rpmsg channel [%lu ---> %lu]\r\n", app_chnl->src, app_chnl->dst);
 
 
     /*
@@ -88,7 +88,7 @@ void PingPongTask(void *pvParameters)
     */
     for (;;) {
 	xSemaphoreTake(app_sema, portMAX_DELAY);
-	printf("Get Data From A5 : %d\r\n", msg_var);
+	printf("Get Data From A5 : %lu\r\n", msg_var);
 	msg_var++;
 	rpmsg_send(app_chnl, (void*)&msg_var, sizeof(uint32_t));
     }

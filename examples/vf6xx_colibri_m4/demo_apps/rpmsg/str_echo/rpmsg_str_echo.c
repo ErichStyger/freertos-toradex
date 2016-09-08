@@ -109,7 +109,7 @@ void StrEchoTask(void *pvParameters)
     * rpmsg_channel_created will post the first semaphore
     */
     xSemaphoreTake(app_sema, portMAX_DELAY);
-    printf("Name service handshake is done, M4 has setup a rpmsg channel [%d ---> %d]\r\n", app_chnl->src, app_chnl->dst);
+    printf("Name service handshake is done, M4 has setup a rpmsg channel [%lu ---> %lu]\r\n", app_chnl->src, app_chnl->dst);
 
 
     /*
