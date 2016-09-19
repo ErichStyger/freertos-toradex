@@ -113,7 +113,7 @@ void StrEchoTask(void *pvParameters)
 
 
     /*
-    * pingpong demo loop
+    * String Echo demo loop
     */
     for (;;) {
 	xSemaphoreTake(app_sema, portMAX_DELAY);
@@ -146,7 +146,7 @@ int main(void)
 
     vf6xx_DbgConsole_Init(UART2, ccmIpgBusClk, 115200);
 
-    printf("Starting RPMSG PingPong Demo...\r\n");
+    printf("Starting RPMSG String Echo Demo...\r\n");
 
     /*
     * Prepare for the MSCM Interrupt
