@@ -34,6 +34,7 @@
 #include <ccm_vf6xx.h>
 #include <lpuart_vf6xx.h>
 #include "debug_console_vf6xx.h"
+#include "pin_mux.h"
 
 /*!
  * @brief A basic user-defined task
@@ -58,6 +59,7 @@ int main(void)
 	CCM_GetClocks();
 	CCM_ControlGate(ccmCcgrGateUart2, ccmClockNeededAll);
 
+	configure_uart_pins(UART2);
 	vf6xx_DbgConsole_Init(UART2, ccmIpgBusClk, 115200);
 
     xTaskCreate(HelloTask, "Print Task", configMINIMAL_STACK_SIZE,

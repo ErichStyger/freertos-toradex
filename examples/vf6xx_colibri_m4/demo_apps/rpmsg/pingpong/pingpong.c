@@ -38,6 +38,7 @@
 #include "plat_porting.h"
 #include <ccm_vf6xx.h>
 #include "debug_console_vf6xx.h"
+#include "pin_mux.h"
 
 /*
  * function decalaration for platform provided facility
@@ -100,6 +101,7 @@ int main(void)
     CCM_GetClocks();
     CCM_ControlGate(ccmCcgrGateUart2, ccmClockNeededAll);
 
+    configure_uart_pins(UART2);
     vf6xx_DbgConsole_Init(UART2, ccmIpgBusClk, 115200);
 
     printf("Starting RPMSG PingPong Demo...\r\n");

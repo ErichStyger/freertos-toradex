@@ -153,6 +153,8 @@ ADD_EXECUTABLE(rpmsg_str_echo_example
     "${ProjDirPath}/../../../../../../platform/devices/VF6XX/startup/system_VF6XX_M4.c"
     "${ProjDirPath}/../../../../../../platform/devices/VF6XX/startup/system_VF6XX_M4.h"
     "${ProjDirPath}/../rpmsg_str_echo.c"
+    "${ProjDirPath}/../../../../pin_mux.c"
+    "${ProjDirPath}/../../../../pin_mux.h"
 )
 SET_TARGET_PROPERTIES(rpmsg_str_echo_example PROPERTIES OUTPUT_NAME "rpmsg_str_echo_example.elf")
 

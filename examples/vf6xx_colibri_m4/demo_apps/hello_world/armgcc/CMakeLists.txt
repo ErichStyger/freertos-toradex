@@ -127,6 +127,8 @@ ADD_EXECUTABLE(hello_world
     "${ProjDirPath}/../../../../../platform/utilities/src/print_scan.h"
     "${ProjDirPath}/../../../../../platform/devices/VF6XX/startup/system_VF6XX_M4.c"
     "${ProjDirPath}/../../../../../platform/devices/VF6XX/startup/system_VF6XX_M4.h"
+    "${ProjDirPath}/../../../pin_mux.c"
+    "${ProjDirPath}/../../../pin_mux.h"
 )
 SET_TARGET_PROPERTIES(hello_world PROPERTIES OUTPUT_NAME "hello_world.elf")
 

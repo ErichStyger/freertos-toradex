@@ -35,6 +35,7 @@
 #include <lpuart_vf6xx.h>
 #include <gpio_vf6xx.h>
 #include "debug_console_vf6xx.h"
+#include "pin_mux.h"
 
 struct hello_world {
 	const char *text;
@@ -73,6 +74,7 @@ int main(void)
 	CCM_GetClocks();
 	CCM_ControlGate(ccmCcgrGateUart2, ccmClockNeededAll);
 
+	configure_uart_pins(UART2);
 	vf6xx_DbgConsole_Init(UART2, ccmIpgBusClk, 115200);
 
 	gpio_init_t ledIn = {.pin = 38, .direction = gpioDigitalInput};
