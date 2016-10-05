@@ -50,6 +50,8 @@ void GPIO_Init(GPIO_Type* base, gpio_init_t* initStruct)
 	uint32_t dir;
 	uint32_t iomux_addr;
 
+
+	configure_gpio_pin(initStruct->pin);
 	/*
 	 * Only on Vybrid the input/output buffer enable flags
 	 * are part of the shared mux/conf register.

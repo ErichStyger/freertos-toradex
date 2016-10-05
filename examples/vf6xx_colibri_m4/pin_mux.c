@@ -39,6 +39,14 @@
 #include "device_imx.h"
 #include "pin_mux.h"
 
+void configure_gpio_pin(uint32_t gpio)
+{
+	uint32_t iomux_addr = iomux_gpio_pad_addr[gpio];
+
+	*((volatile uint32_t *)((uint32_t)iomux_addr)) = ((IOMUXC_MUX_MODE_ALT0) << IOMUXC_MUX_MODE_SHIFT | (IOMUXC_SPEED_MEDIUM) << IOMUXC_SPEED_SHIFT |
+													 (IOMUXC_DSE_50OHM) << IOMUXC_DSE_SHIFT | (IOMUXC_PUS_PU_47KOHM) << IOMUXC_PUS_SHIFT);
+}
+
 void configure_uart_pins(UART_Type* base)
 {
     switch((uint32_t)base)
