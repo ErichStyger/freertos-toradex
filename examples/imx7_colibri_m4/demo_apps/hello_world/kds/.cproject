@@ -64,19 +64,20 @@
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths.1050071270" name="Include paths (-I)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.include.paths" useByScannerDiscovery="false" valueType="includePath">
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../examples/imx7_colibri_m4/demo_apps/hello_world"/>
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../examples/imx7_colibri_m4"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../platform/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../platform/devices"/>
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../platform/devices/MCIMX7D/startup"/>
-									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../platform/CMSIS/Include"/>
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../platform/devices/MCIMX7D/include"/>
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../platform/drivers/inc"/>
+									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../platform/utilities/inc"/>
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/include"/>
 									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../rtos/FreeRTOS/Source/portable/GCC/ARM_CM4F"/>
-									<listOptionValue builtIn="false" value="${ProjDirPath}/../../../../../platform/utilities/inc"/>
 								</option>
 								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs.1846905278" name="Defined symbols (-D)" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.defs" useByScannerDiscovery="false" valueType="definedSymbols">
 									<listOptionValue builtIn="false" value="CPU_MCIMX7D_M4"/>
 									<listOptionValue builtIn="false" value="__DEBUG"/>
 								</option>
+								<option id="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc.1358670916" superClass="ilg.gnuarmeclipse.managedbuild.cross.option.c.compiler.nostdinc" value="false" valueType="boolean"/>
 								<inputType id="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input.1535875432" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.c.compiler.input"/>
 							</tool>
 							<tool id="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler.601608447" name="Cross ARM C++ Compiler" superClass="ilg.gnuarmeclipse.managedbuild.cross.tool.cpp.compiler">

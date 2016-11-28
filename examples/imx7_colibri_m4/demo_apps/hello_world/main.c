@@ -48,7 +48,7 @@ void HelloTask(void *pvParameters)
     uint8_t receiveBuff;
 
     // Print the initial banner
-    PRINTF("\r\nHello World!\n\n\r");
+    PRINTF("\r\nHello World from KDS3!\n\n\r");
 
     while(1)
     {
